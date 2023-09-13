@@ -1,7 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 require("dotenv").config();
-const tradingDataRoutes = require("./routes/tradingDataRoutes");
+const tradingDataRoutes = require("./app/routes/tradingDataRoutes");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -22,6 +22,8 @@ app.use(express.urlencoded({ extended: true }));
 // Require your routes here
 app.use("/trading-data", tradingDataRoutes);
 
-app.listen(PORT, () => {
-  console.log(`Server is running on PORT ${PORT}`);
-});
+// app.listen(PORT, () => {
+//   console.log(`Server is running on PORT ${PORT}`);
+// });
+
+module.exports = app;
