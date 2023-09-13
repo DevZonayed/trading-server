@@ -5,7 +5,7 @@ require("dotenv").config();
 const tradingDataRoutes = require("./app/routes/tradingDataRoutes");
 
 const app = express();
-var whitelist = ["https://management.shorobindu.com", "http://localhost:3000"];
+// var whitelist = ["https://management.shorobindu.com", "http://localhost:3000"];
 var corsOptions = {
   origin: function (origin, callback) {
     if (whitelist.indexOf(origin) !== -1) {
@@ -15,7 +15,7 @@ var corsOptions = {
     }
   },
 };
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
 // All middleware goes here
 app.use(compression());
 app.use(express.urlencoded({ extended: false }));
