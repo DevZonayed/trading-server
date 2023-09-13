@@ -4,10 +4,10 @@
   "description": "This is a simple trading server",
   "main": "app.js",
   "scripts": {
-    "start": "node app/app.js",
+    "start": "node app.js",
     "tunnel": "concurrently \"npm start\" \"npm run ngrok\"",
     "ngrok": "ngrok http 3000",
-    "dev": "nodemon app/app.js"
+    "dev": "nodemon app.js"
   },
   "keywords": [],
   "author": "",
