@@ -17,7 +17,7 @@ var corsOptions = {
 };
 // app.use(cors(corsOptions));
 // All middleware goes here
-app.use(compression());
+// app.use(compression());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.text());
 app.use(express.json());
