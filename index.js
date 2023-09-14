@@ -40,17 +40,7 @@ var corsOptions = {
   },
 };
 
-// function timerfunction(){
-//     let timer = setInterval(() => {
-//         console.warn("Hello this is a warn")
-//         clearInterval(timer)
-//         timerfunction()
-//     }, 5000)
-// }
-
-// timerfunction()
-
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
 
 // All middleware goes here
 app.use(compression());
@@ -63,23 +53,29 @@ app.use(express.text());
 app.use(express.urlencoded({ extended: false }));
 
 app.set("trust proxy", true);
-app.use(cookieParser());
+// app.use(cookieParser());
 // User Router
-app.use("/api/v1/user", userRouter);
-app.use("/api/v1/lead", LeadRouter);
-app.use("/api/v1/subject", subjectRouter);
-app.use("/api/v1/session", sessionRouter);
-app.use("/api/v1/template", emailTemplateRouter);
-app.use("/api/v1/settings", SettingsRouter);
-app.use("/api/v1/message", messageRouter);
-app.use("/api/v1/mail", mailRouter);
-app.use("/api/v1/dashbord", dashBordRouter);
-app.use("/api/v1/general", generalRouter);
-app.use("/api/v1/trading-server", generalRouter);
+// app.use("/api/v1/user", userRouter);
+// app.use("/api/v1/lead", LeadRouter);
+// app.use("/api/v1/subject", subjectRouter);
+// app.use("/api/v1/session", sessionRouter);
+// app.use("/api/v1/template", emailTemplateRouter);
+// app.use("/api/v1/settings", SettingsRouter);
+// app.use("/api/v1/message", messageRouter);
+// app.use("/api/v1/mail", mailRouter);
+// app.use("/api/v1/dashbord", dashBordRouter);
+// app.use("/api/v1/general", generalRouter);
+// app.use("/api/v1/trading-server", generalRouter);
+
+app.get("/", (req, res) => {
+  res.json({
+    message: "Getting Successful",
+  });
+});
 
 // Error Middleware
-app.use(notFoundMiddleware);
-app.use(errorMiddleware);
+// app.use(notFoundMiddleware);
+// app.use(errorMiddleware);
 
 const PORT = process.env.SERVER_PORT || 7000;
 mongoConnection();
