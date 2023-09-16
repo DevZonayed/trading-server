@@ -44,10 +44,10 @@ app.use(express.urlencoded({ extended: false }));
 app.set("trust proxy", true);
 
 // Routes
-app.use("api/v1/trading-data", TradingRoute);
-app.get("api/v1/", (req, res) => {
+app.use("/api/v1/trading-data", TradingRoute);
+app.get("/api/v1", (req, res) => {
   res.json({
-    message: "Getting Success",
+    message: "Test Route Getting Success",
   });
 });
 
