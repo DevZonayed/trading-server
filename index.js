@@ -45,6 +45,11 @@ app.set("trust proxy", true);
 
 // Routes
 app.use("/api/v1/trading-data", TradingRoute);
+app.post("/api/v1/post", (req, res) => {
+  res.json({
+    message: "Post Success",
+  });
+});
 app.get("/api/v1", (req, res) => {
   res.json({
     message: "Test Route Getting Success",
