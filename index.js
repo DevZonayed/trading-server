@@ -11,6 +11,7 @@ const {
 const scheduleJobs = require("./api/schedules/scheduleJob");
 
 const path = require("path");
+const TradingRoute = require("./api/router/tradingDataRoutes");
 
 // Schedule Job
 scheduleJobs();
@@ -40,14 +41,10 @@ app.use(
 );
 app.use(express.text());
 app.use(express.urlencoded({ extended: false }));
-
 app.set("trust proxy", true);
 
-app.get("/", (req, res) => {
-  res.json({
-    message: "Getting Successful",
-  });
-});
+// Routes
+app.use("/api/v1/trading-data", TradingRoute);
 
 // Error Middleware
 app.use(notFoundMiddleware);

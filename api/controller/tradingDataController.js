@@ -1,4 +1,4 @@
-const TradingData = require("../models/TradingData");
+const TradingData = require("../model/TradingData");
 
 // Implement your controller logic here
 // Example: Handling POST requests for TradingView data
