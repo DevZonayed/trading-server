@@ -44,7 +44,12 @@ app.use(express.urlencoded({ extended: false }));
 app.set("trust proxy", true);
 
 // Routes
-app.use("/api/v1/trading-data", TradingRoute);
+app.use("api/v1/trading-data", TradingRoute);
+app.get("api/v1/", (req, res) => {
+  res.json({
+    message: "Getting Success",
+  });
+});
 
 // Error Middleware
 app.use(notFoundMiddleware);
