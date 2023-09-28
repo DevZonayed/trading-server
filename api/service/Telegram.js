@@ -10,6 +10,7 @@ class Telegram {
   }
 
   sendMessage(text) {
+    console.warn(text);
     axios.post(`https://api.telegram.org/bot${this.botToken}/sendMessage`, {
       chat_id: this.groupId,
       text: text,
