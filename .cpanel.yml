@@ -1,4 +1,5 @@
+---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/shorvlqo/public_html/
+    - export DEPLOYPATH=/home/shorvlqo/repositories/trading-server
     - /bin/cp * $DEPLOYPATH
