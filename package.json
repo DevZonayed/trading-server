@@ -4,7 +4,10 @@
   "description": "Lead menagement application by Zonayed Ahamad",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "dev": "nodemon app.js",
+    "ngrok": "ngrok http 3000",
+    "lt": "lt --port 3000 --subdomain trading-zonayed -w"
   },
   "author": "sorobindu",
   "license": "MIT",

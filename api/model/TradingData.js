@@ -2,7 +2,19 @@ const mongoose = require("mongoose");
 
 const tradingDataSchema = new mongoose.Schema(
   {
-    data: String,
+    name: {
+      type: String,
+      require: true,
+    },
+    time: {
+      type: String,
+      require: true,
+    },
+    timeframe: {
+      type: String,
+      require: true,
+    },
+    data: Object,
   },
   {
     timestamps: true,
