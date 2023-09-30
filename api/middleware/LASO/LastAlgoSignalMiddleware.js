@@ -1,12 +1,15 @@
-const AsyncHandler = require("express-async-handler");
 const { csvStringToObject } = require("../../helper/phoneNumberFormater");
+const TradingData = require("../../model/TradingData");
 const { TelegramInstance } = require("../../service/Telegram");
+const AsyncHandler = require("express-async-handler");
+const { generateNotify } = require("./Notifications/genNotifyTel");
 
 const LastAlgoSignalMiddleware = AsyncHandler(async (req, res, next) => {
   let bodyData = csvStringToObject(req.body)[0];
   let { name, time, timeframe, type, ...restData } = bodyData;
-  if (type != "LASO1" || type != "LASO5" || !type) {
-    next();
+  if (!(type == "LASO1" || type == "LASO5" || !type)) {
+    console.log("Called Next");
+    return next();
   }
 
   // Construct the update query
@@ -25,7 +28,7 @@ const LastAlgoSignalMiddleware = AsyncHandler(async (req, res, next) => {
     }
   );
 
-  let message = generateNotify(updatedDocument.data[type]);
+  let message = generateNotify(updatedDocument?.data[type]);
   message =
     `${timeframe} Candles ${type} data report:\n ==========================\n` +
     message;
