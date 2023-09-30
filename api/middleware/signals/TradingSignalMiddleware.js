@@ -26,25 +26,29 @@ exports.TradingDataMiddleware = async (req, res, next) => {
       });
     }
 
-    let candleData = await TradingData.find({
+    let candleData = await TradingData.findOne({
       timeframe,
       time,
       name,
-    })[0];
+    });
 
     if (!candleData || !candleData?.data?.BB) {
-      TelegramInstance.sendMessage(
-        `Signal found but Bolinger band's data not found`
-      );
-      if (tryCount <= 3) {
-        return setTimeout(() => {
-          tryCount += 1;
-          TradingDataMiddleware(req, res, next);
-        }, 5000);
+      candleData = await TradingData.findOne({
+        timeframe,
+        name,
+      })
+        .sort({ createdAt: -1 })
+        .skip(1)
+        .limit(1);
+
+      if (!candleData || !candleData?.data?.BB) {
+        TelegramInstance.sendMessage(
+          `Signal found but Bolinger band's data not found`
+        );
+        return res.json({
+          message: "Bolinger Band data not found",
+        });
       }
-      return res.json({
-        message: "Bolinger Band data not found",
-      });
     }
 
     let { upper, lower } = candleData?.data?.BB;
