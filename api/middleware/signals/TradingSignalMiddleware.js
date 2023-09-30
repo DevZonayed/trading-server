@@ -6,7 +6,7 @@ const {
 } = require("../../utils/BB/BolingerBands");
 
 const REQUIRMENTFORSIGNALS = {
-  thrashold: 50,
+  thrashold: 40,
 };
 /**
  * /api/v1/trading-data/signal-data
