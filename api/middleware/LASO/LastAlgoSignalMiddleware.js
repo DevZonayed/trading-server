@@ -33,7 +33,7 @@ const LastAlgoSignalMiddleware = AsyncHandler(async (req, res, next) => {
     `<b><i>${timeframe} Candles ${type} data report:</i></b>\n ==========================\n` +
     message;
   // Send repost to telegram
-  TelegramInstance.sendMessage(message);
+  TelegramInstance.sendMessagehtml(message);
   res.status(200).json(updatedDocument);
 });
 
