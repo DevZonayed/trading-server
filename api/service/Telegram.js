@@ -22,6 +22,20 @@ class Telegram {
         console.error(err);
       });
   }
+  sendMessagehtml(text) {
+    axios
+      .post(`https://api.telegram.org/bot${this.botToken}/sendMessage`, {
+        chat_id: this.groupId,
+        text: text,
+        parse_mode: "HTML",
+      })
+      .then((res) => {
+        console.log(res.data);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }
 }
 
 const TelegramInstance = new Telegram(BOT_TOKEN, GROUP_ID);
