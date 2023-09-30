@@ -13,6 +13,7 @@ const REQUIRMENTFORSIGNALS = {
  * @param {*} req
  * @param {*} res
  */
+let tryCount = 0;
 exports.TradingDataMiddleware = async (req, res, next) => {
   try {
     let { type, name, time, timeframe, ...restData } = csvStringToObject(
@@ -35,7 +36,12 @@ exports.TradingDataMiddleware = async (req, res, next) => {
       TelegramInstance.sendMessage(
         `Signal found but Bolinger band's data not found`
       );
-
+      if (tryCount <= 3) {
+        return setTimeout(() => {
+          tryCount += 1;
+          TradingDataMiddleware(req, res, next);
+        }, 5000);
+      }
       return res.json({
         message: "Bolinger Band data not found",
       });
