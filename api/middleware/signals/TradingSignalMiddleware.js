@@ -57,7 +57,10 @@ exports.TradingDataMiddleware = async (req, res, next) => {
     // Check the thrashold
     if (!(thrashold >= REQUIRMENTFORSIGNALS.thrashold)) {
       TelegramInstance.sendMessage(
-        `${restData.signal_type} signal occard but thrashold is so low`
+        `${restData.signal_type} signal occard but thrashold is so low
+          needed thrashold is above ${REQUIRMENTFORSIGNALS.thrashold}%
+          But the signal thrashold is ${thrashold}%
+        `
       );
       // send response to database
       return res.json({
