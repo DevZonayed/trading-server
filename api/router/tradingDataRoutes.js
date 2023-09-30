@@ -2,6 +2,9 @@ const express = require("express");
 const router = express.Router();
 const tradingDataController = require("../controller/tradingDataController");
 const TradingSignalMiddleware = require("../middleware/signals/TradingSignalMiddleware");
+const {
+  LastAlgoSignalMiddleware,
+} = require("../middleware/LASO/LastAlgoSignalMiddleware");
 
 // Define your routes here
 router.post(
@@ -9,6 +12,10 @@ router.post(
   TradingSignalMiddleware.TradingDataMiddleware,
   tradingDataController.handleTradingSignal
 );
-router.post("/", tradingDataController.updateTradingData);
+router.post(
+  "/",
+  LastAlgoSignalMiddleware,
+  tradingDataController.updateTradingData
+);
 
 module.exports = router;
