@@ -30,7 +30,7 @@ const LastAlgoSignalMiddleware = AsyncHandler(async (req, res, next) => {
 
   let message = generateNotify(updatedDocument?.data[type]);
   message =
-    `${timeframe} Candles ${type} data report:\n ==========================\n` +
+    `<b><i>${timeframe} Candles ${type} data report:</i></b>\n ==========================\n` +
     message;
   // Send repost to telegram
   TelegramInstance.sendMessage(message);

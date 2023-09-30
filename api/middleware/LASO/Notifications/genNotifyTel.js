@@ -24,49 +24,53 @@ function generateNotify(allData) {
 
   message = "";
   if (bullish !== "0") {
-    message += `Buy Signal Occered. ${bullish} \n`;
+    message += `<b>Buy Signal Occered. ${bullish}</b> \n`;
   }
 
   if (bullish_plus !== "0") {
-    message += `Strong Buy Signal Occered. ${bullish_plus} \n`;
+    message += `<b>Strong Buy Signal Occered. ${bullish_plus}</b> \n`;
   }
 
   if (bearish !== "0") {
-    message += `Sell Signal Occered. ${bearish} \n`;
+    message += `<b>Sell Signal Occered. ${bearish}</b> \n`;
   }
 
   if (bearish_plus !== "0") {
-    message += `Strong Sell Signal Occered. ${bearish_plus} \n`;
+    message += `<b>Strong Sell Signal Occered. ${bearish_plus}</b> \n`;
   }
 
   if (bearish_exit !== "null") {
-    message += `Sell Exit Signal Occered. ${bearish_exit} \n`;
+    message += `<b>Sell Exit Signal Occered. ${bearish_exit}</b> \n`;
   }
 
   if (bullish_exit !== "null") {
-    message += `Buy Exit Signal Occered. ${bearish_exit} \n`;
+    message += `<b>Buy Exit Signal Occered. ${bearish_exit}</b> \n`;
   }
 
-  message += `Trand Strength is ${(+trand_strength).toFixed(2)}% \n`;
+  message += `Trand Strength is :<code> ${(+trand_strength).toFixed(
+    2
+  )}%</code> \n`;
   message += `Bar Color Is ${
     +bar_color_value < 0 ? "RED" : +bar_color_value > 0 ? "GREEN" : "VIOLET"
   } \n`;
   message += `Dynamic Profit taking price should ${(+take_profit).toFixed(
     2
   )} \n`;
-  message += `Dynamic Stop Lose price should ${(+stop_loss).toFixed(2)} \n`;
-  message += `Trand Tracker IS ${(+trend_tracer).toFixed(2)} \n`;
-  message += `Trand Catcher IS ${(+trend_catcher).toFixed(2)} \n`;
-  message += `Smart Trail IS ${(+smart_trail).toFixed(2)} \n`;
-  message += `Smart Trail Extremity IS ${(+smart_trail_extremity).toFixed(
+  message += `Dynamic Stop Lose price should <code>${(+stop_loss).toFixed(
     2
-  )} \n`;
-  message += `Rz r3 band IS ${(+rz_r3_band).toFixed(2)} \n`;
-  message += `Rz r2 band IS ${(+rz_r2_band).toFixed(2)} \n`;
-  message += `Rz r1 band IS ${(+rz_r1_band).toFixed(2)} \n`;
-  message += `Rz s1 band IS ${(+rz_s1_band).toFixed(2)} \n`;
-  message += `Rz s2 band IS ${(+rz_s2_band).toFixed(2)} \n`;
-  message += `Rz s3 band IS ${(+rz_s3_band).toFixed(2)} \n`;
+  )}</code> \n`;
+  message += `Trand Tracker IS <code>${(+trend_tracer).toFixed(2)}</code> \n`;
+  message += `Trand Catcher IS<code> ${(+trend_catcher).toFixed(2)}</code> \n`;
+  message += `Smart Trail IS <code>${(+smart_trail).toFixed(2)}</code> \n`;
+  message += `Smart Trail Extremity IS <code>${(+smart_trail_extremity).toFixed(
+    2
+  )}</code> \n`;
+  message += `Rz r3 band IS <code>${(+rz_r3_band).toFixed(2)}</code> \n`;
+  message += `Rz r2 band IS <code>${(+rz_r2_band).toFixed(2)}</code> \n`;
+  message += `Rz r1 band IS <code>${(+rz_r1_band).toFixed(2)}</code> \n`;
+  message += `Rz s1 band IS <code>${(+rz_s1_band).toFixed(2)}</code> \n`;
+  message += `Rz s2 band IS <code>${(+rz_s2_band).toFixed(2)}</code> \n`;
+  message += `Rz s3 band IS <code>${(+rz_s3_band).toFixed(2)}</code> \n`;
   return message;
 }
 
