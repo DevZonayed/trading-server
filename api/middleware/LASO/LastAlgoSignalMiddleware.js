@@ -57,7 +57,7 @@ const LastAlgoSignalMiddleware = AsyncHandler(async (req, res, next) => {
   trend_tracer: ${candleData.trend_tracer},
   upperTail: ${candleData.upperTail}%,
   lowerTail: ${candleData.lowerTail}%,
-  entryAmount: ${candleData.entryAmaunt}%
+  entryAmount: ${candleData.entryAmaunt}
   </pre>
   `);
 
@@ -68,6 +68,7 @@ const LastAlgoSignalMiddleware = AsyncHandler(async (req, res, next) => {
       `COIN: ${strengthStratgy.data.coin}
       Direction: ${strengthStratgy.data.direction}
       Exchange: ${strengthStratgy.data.exchange}
+      Leverage: ${strengthStratgy.data.leverage}
       ENTRY: ${strengthStratgy.data.entry}`
     );
   }
