@@ -5,14 +5,10 @@ function signalStrengthStrategy(InitialData, candleData) {
     signal,
     isClose,
     polished_trend_catcher,
-    take_profit,
-    stop_loss,
-    trand_strength,
     barColor,
-    smart_trail,
-    trend_tracer,
     upperTail,
     lowerTail,
+    entryAmaunt,
   } = InitialData;
 
   const { name } = candleData;
@@ -23,7 +19,7 @@ function signalStrengthStrategy(InitialData, candleData) {
       coin: name,
       direction: null,
       exchange: "Binance Futures, ByBIt USDT",
-      entry: "close price",
+      entry: entryAmaunt,
     },
   };
 
@@ -56,18 +52,6 @@ function signalStrengthStrategy(InitialData, candleData) {
       data: {
         ...result.data,
         direction: "Long",
-      },
-    };
-  }
-
-  //   Close Order
-  if (isClose !== null) {
-    result = {
-      ...result,
-      status: true,
-      data: {
-        ...result.data,
-        direction: "Exit",
       },
     };
   }

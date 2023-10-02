@@ -41,6 +41,7 @@ async function organizeLaData(allData, type) {
       trend_tracer,
       upperTail: null,
       lowerTail: null,
+      entryAmaunt: null,
     };
 
     //   Determind the signal
@@ -58,8 +59,6 @@ async function organizeLaData(allData, type) {
     }
 
     //   Prev Candle Data
-    // timeframe == "5"
-    //   ? await CandleData.FiveMinCandleData.get(2)[1]
     const prevCandle = await TradingData.find({ name, timeframe })
       .sort({
         createdAt: -1,
@@ -88,10 +87,24 @@ async function organizeLaData(allData, type) {
       tailSize = calculateTailSizePercentage({ open, close, high, low });
     }
 
+    // Order Entry Amount
+    let entryAmaunt = null;
+    if (open && close && high && low) {
+      const upperMiddle = (high + Math.max(open, close)) / 2;
+      const lowerMiddle = (low + Math.min(open, close)) / 2;
+
+      if (signal == "Long") {
+        entryAmaunt = upperMiddle;
+      } else if (signal == "Short") {
+        entryAmaunt = lowerMiddle;
+      }
+    }
+
     Data = {
       ...Data,
       signal,
       isClose,
+      entryAmaunt,
       polished_trend_catcher: trend_catcherLocal,
       ...tailSize,
     };

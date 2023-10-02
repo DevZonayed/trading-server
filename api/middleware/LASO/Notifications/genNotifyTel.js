@@ -44,7 +44,7 @@ function generateNotify(allData) {
   }
 
   if (bullish_exit !== "null") {
-    message += `<b>Buy Exit Signal Occered. ${bearish_exit}</b> \n`;
+    message += `<b>Buy Exit Signal Occered. ${bullish_exit}</b> \n`;
   }
 
   message += `Trand Strength is :<code> ${(+trand_strength).toFixed(

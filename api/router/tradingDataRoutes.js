@@ -6,6 +6,7 @@ const {
   LastAlgoSignalMiddleware,
 } = require("../middleware/LASO/LastAlgoSignalMiddleware");
 
+router.post("/push", tradingDataController.handlePushToTeligrame);
 // Define your routes here
 router.post(
   "/signal-data",

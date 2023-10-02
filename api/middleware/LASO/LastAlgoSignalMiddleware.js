@@ -39,6 +39,10 @@ const LastAlgoSignalMiddleware = AsyncHandler(async (req, res, next) => {
   // Send repost to telegram
   // TelegramInstance.sendMessagehtml(message);
   let candleData = await organizeLaData(updatedDocument, type);
+
+  console.log(updatedDocument?.data[type]);
+  console.log(candleData);
+
   TelegramInstance.sendMessagehtml(`
   <pre>
   ${timeframe} min Data Update
@@ -52,7 +56,8 @@ const LastAlgoSignalMiddleware = AsyncHandler(async (req, res, next) => {
   smart_trail: ${candleData.smart_trail},
   trend_tracer: ${candleData.trend_tracer},
   upperTail: ${candleData.upperTail}%,
-  lowerTail: ${candleData.lowerTail}%
+  lowerTail: ${candleData.lowerTail}%,
+  entryAmount: ${candleData.entryAmaunt}%
   </pre>
   `);
 
@@ -60,14 +65,18 @@ const LastAlgoSignalMiddleware = AsyncHandler(async (req, res, next) => {
   let strengthStratgy = signalStrengthStrategy(candleData, updatedDocument);
   if (strengthStratgy.status) {
     TelegramPandaBite5MinInstance.sendMessage(
-      `
-      COIN*: ${strengthStratgy.data.coin}
-      Direction*: ${strengthStratgy.data.direction}
-      Exchange*: ${strengthStratgy.data.exchange}
-      ENTRY*: ${strengthStratgy.data.entry}
-      `
+      `COIN: ${strengthStratgy.data.coin}
+      Direction: ${strengthStratgy.data.direction}
+      Exchange: ${strengthStratgy.data.exchange}
+      ENTRY: ${strengthStratgy.data.entry}`
     );
   }
+
+  // Send Close Signal to telegram
+  if (candleData.isClose) {
+    TelegramPandaBite5MinInstance.sendMessage(`CLOSE ${name}`);
+  }
+
   res.status(200).json(updatedDocument);
 });
 
