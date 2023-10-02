@@ -1,6 +1,9 @@
 const TradingData = require("../model/TradingData");
 const { csvStringToObject } = require("../helper/phoneNumberFormater");
-const { TelegramInstance } = require("../service/Telegram");
+const {
+  TelegramInstance,
+  TelegramPandaBite5MinInstance,
+} = require("../service/Telegram");
 const {
   getDiffrenceOfUpperAndLowerForBB,
 } = require("../utils/BB/BolingerBands");
@@ -88,5 +91,30 @@ exports.handleTradingSignal = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
+  }
+};
+
+exports.handlePushToTeligrame = async (req, res) => {
+  try {
+    let formatedChunk = csvStringToObject(req.body)[0];
+    let { to, message } = formatedChunk;
+
+    console.log(formatedChunk);
+    console.log(to, message);
+    if (to == "notify") {
+      TelegramInstance.sendMessage(message);
+    } else if (to == "tread") {
+      TelegramPandaBite5MinInstance.sendMessage(message);
+    } else {
+      TelegramInstance.sendMessage(
+        `Unknown Format of notifaction pushed\n"${req.body}"\n== Format Should be : \nto,message\nnotify/tread,test message`
+      );
+    }
+
+    res.json({
+      message: "Success",
+    });
+  } catch (err) {
+    console.warn(err);
   }
 };
