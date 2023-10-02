@@ -6,13 +6,13 @@ const {
   LastAlgoSignalMiddleware,
 } = require("../middleware/LASO/LastAlgoSignalMiddleware");
 
-router.post("/push", tradingDataController.handlePushToTeligrame);
 // Define your routes here
 router.post(
   "/signal-data",
   TradingSignalMiddleware.TradingDataMiddleware,
   tradingDataController.handleTradingSignal
 );
+router.post("/push", tradingDataController.handlePushToTeligrame);
 router.post(
   "/",
   LastAlgoSignalMiddleware,

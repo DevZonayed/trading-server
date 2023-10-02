@@ -99,8 +99,6 @@ exports.handlePushToTeligrame = async (req, res) => {
     let formatedChunk = csvStringToObject(req.body)[0];
     let { to, message } = formatedChunk;
 
-    console.log(formatedChunk);
-    console.log(to, message);
     if (to == "notify") {
       TelegramInstance.sendMessage(message);
     } else if (to == "tread") {
