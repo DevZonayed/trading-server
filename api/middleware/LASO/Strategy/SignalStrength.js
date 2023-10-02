@@ -19,6 +19,7 @@ function signalStrengthStrategy(InitialData, candleData) {
       coin: name,
       direction: null,
       exchange: "Binance Futures, ByBIt USDT",
+      leverage: "Isolated 1x",
       entry: entryAmaunt,
     },
   };
