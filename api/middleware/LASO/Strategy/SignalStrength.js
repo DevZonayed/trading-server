@@ -1,4 +1,4 @@
-const CANDLE_TAIL_MAX_TOLARENCE = 0.2;
+const CANDLE_TAIL_MAX_TOLARENCE = 0.5;
 
 function signalStrengthStrategy(InitialData, candleData) {
   const {
