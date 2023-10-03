@@ -1,9 +1,5 @@
 const TradingData = require("../../../model/TradingData");
 
-let tempStore = {
-  trend_catcher: null,
-};
-
 async function organizeLaData(allData, type) {
   try {
     const {
@@ -27,7 +23,7 @@ async function organizeLaData(allData, type) {
       low,
     } = allData?.data[type];
 
-    const { name, timeframe } = allData;
+    const { name, timeframe, _id } = allData;
 
     let Data = {
       signal: null,
@@ -75,9 +71,7 @@ async function organizeLaData(allData, type) {
             ? 1
             : +laData.trend_catcher > +trend_catcher
             ? 0
-            : tempStore.trend_catcher;
-        // Store for previous
-        tempStore = { ...tempStore, trend_catcher: trend_catcherLocal };
+            : laData.polished_trend_catcher;
       }
     }
 
@@ -90,8 +84,8 @@ async function organizeLaData(allData, type) {
     // Order Entry Amount
     let entryAmaunt = null;
     if (open && close && high && low) {
-      const upperMiddle = (high + Math.max(open, close)) / 2;
-      const lowerMiddle = (low + Math.min(open, close)) / 2;
+      const upperMiddle = (+high + Math.max(+open, +close)) / 2;
+      const lowerMiddle = (+low + Math.min(+open, +close)) / 2;
 
       if (signal == "Long") {
         entryAmaunt = upperMiddle;
@@ -108,6 +102,18 @@ async function organizeLaData(allData, type) {
       polished_trend_catcher: trend_catcherLocal,
       ...tailSize,
     };
+
+    // Update to database
+    await TradingData.findOneAndUpdate(
+      { _id: _id },
+      {
+        $set: Object.entries(Data).reduce((update, [key, value]) => {
+          update[`data.${type}.${key}`] = value;
+          return update;
+        }, {}),
+      },
+      { new: true }
+    );
 
     return Data;
   } catch (err) {
