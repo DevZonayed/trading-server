@@ -69,7 +69,8 @@ const LastAlgoSignalMiddleware = AsyncHandler(async (req, res, next) => {
       Direction: ${strengthStratgy.data.direction}
       Exchange: ${strengthStratgy.data.exchange}
       Leverage: ${strengthStratgy.data.leverage}
-      ENTRY: ${strengthStratgy.data.entry}`
+      ENTRY: ${strengthStratgy.data.entry}
+      TARGET: ${strengthStratgy.data.target}`
     );
   }
 
