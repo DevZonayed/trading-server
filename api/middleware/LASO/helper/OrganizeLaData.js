@@ -77,8 +77,10 @@ async function organizeLaData(allData, type) {
 
     // Candle Tail Length
     let tailSize = {};
+    let bodySize = 0;
     if (open && close && high && low) {
       tailSize = calculateTailSizePercentage({ open, close, high, low });
+      bodySize = calculateBodySizePercentage({ open, close, high, low });
     }
 
     // Order Entry Amount
@@ -100,6 +102,7 @@ async function organizeLaData(allData, type) {
       isClose,
       entryAmaunt,
       polished_trend_catcher: trend_catcherLocal,
+      bodySize,
       ...tailSize,
     };
 
@@ -145,4 +148,16 @@ function calculateTailSizePercentage(candle) {
   const lowerTailPercentage = ((lowerTail / close) * 100).toFixed(2);
 
   return { upperTail: +upperTailPercentage, lowerTail: +lowerTailPercentage };
+}
+
+function calculateBodySizePercentage(candle) {
+  let { open, close } = candle;
+
+  open = +open;
+  close = +close;
+
+  // Calculate the candle body size percentage compared to the close
+  const bodySizePercentage = (((close - open) / close) * 100).toFixed(2);
+
+  return +bodySizePercentage;
 }

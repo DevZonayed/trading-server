@@ -1,4 +1,6 @@
 const CANDLE_TAIL_MAX_TOLARENCE = 0.5;
+const MIN_CANDLE_BODY_FOR_TAIL_CONDITION = 1;
+const TARGET_PERCENTAGE = 3;
 
 function signalStrengthStrategy(InitialData, candleData) {
   const {
@@ -8,8 +10,13 @@ function signalStrengthStrategy(InitialData, candleData) {
     barColor,
     upperTail,
     lowerTail,
+    bodySize,
     entryAmaunt,
   } = InitialData;
+
+  //   Order Conditions for Strength Strateg
+  const shortExp = RegExp("short", "i");
+  const longExp = RegExp("long", "i");
 
   const { name } = candleData;
 
@@ -21,18 +28,20 @@ function signalStrengthStrategy(InitialData, candleData) {
       exchange: "Binance Futures, ByBIt USDT",
       leverage: "Isolated 1x",
       entry: entryAmaunt,
+      target: calculateTargetPrice(
+        +entryAmaunt,
+        TARGET_PERCENTAGE,
+        longExp.test(signal)
+      ),
     },
   };
 
-  //   Order Conditions for Strength Strateg
-  const shortExp = RegExp("short", "i");
-  const longExp = RegExp("long", "i");
-
   if (
     signal == null ||
-    upperTail > CANDLE_TAIL_MAX_TOLARENCE ||
-    lowerTail > CANDLE_TAIL_MAX_TOLARENCE ||
-    barColor == "0"
+    barColor == "0" ||
+    (bodySize >= MIN_CANDLE_BODY_FOR_TAIL_CONDITION &&
+      upperTail > CANDLE_TAIL_MAX_TOLARENCE) ||
+    lowerTail > CANDLE_TAIL_MAX_TOLARENCE
   ) {
     return result;
   }
@@ -61,3 +70,11 @@ function signalStrengthStrategy(InitialData, candleData) {
 }
 
 module.exports = { signalStrengthStrategy };
+
+function calculateTargetPrice(entryPrice, profitPercentage, isLongOrder) {
+  if (isLongOrder) {
+    return entryPrice * (1 + profitPercentage / 100);
+  } else {
+    return entryPrice * (1 - profitPercentage / 100);
+  }
+}
