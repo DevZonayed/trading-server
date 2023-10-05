@@ -46,7 +46,7 @@ function signalStrengthStrategy(InitialData, candleData) {
     return result;
   }
 
-  if (shortExp.test(signal) && polished_trend_catcher < 0) {
+  if (shortExp.test(signal) && polished_trend_catcher == 0) {
     result = {
       ...result,
       status: true,
@@ -55,7 +55,7 @@ function signalStrengthStrategy(InitialData, candleData) {
         direction: "Short",
       },
     };
-  } else if (longExp.test(signal) && polished_trend_catcher > 0) {
+  } else if (longExp.test(signal) && polished_trend_catcher == 1) {
     result = {
       ...result,
       status: true,
