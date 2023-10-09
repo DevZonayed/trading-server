@@ -307,7 +307,7 @@ async function lasoFilters(lastCandle, signal) {
     } else {
       return {
         order: "Close",
-        reason: "Unclear Signal",
+        reason: `Unclear Signal\n Smart Trail is : ${luxAlgoData?.polished_smart_trail}\n signal is : ${signal}`,
       };
     }
   } catch (err) {
