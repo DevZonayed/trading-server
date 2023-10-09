@@ -7,7 +7,7 @@ const tradingDataSchema = new mongoose.Schema(
       require: true,
     },
     time: {
-      type: Date,
+      type: String,
       require: true,
     },
     timeframe: {

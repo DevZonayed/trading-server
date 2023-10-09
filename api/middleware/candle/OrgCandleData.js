@@ -33,7 +33,7 @@ const OrgCandleData = AsyncHandler(async (req, res, next) => {
     );
     let candleData = {
       name,
-      time: new Date(time),
+      time: time,
       timeframe: +timeframe,
       open: +open,
       close: +close,
