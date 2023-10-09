@@ -167,7 +167,7 @@ const PsrLuxAlGoStretagy = AsyncHandler(async (req, res) => {
   }
 
   // Other Conditions
-  let filterResult = await lasoFilters(lastCandle, signal);
+  let filterResult = await lasoFilters(candle, signal);
   if (filterResult.order == "Hold") {
     OrderObject = {
       ...OrderObject,
@@ -288,6 +288,7 @@ function isCandleAppropriate(candleData) {
 async function lasoFilters(lastCandle, signal) {
   try {
     let luxAlgoData = lastCandle?.data?.LASO;
+
     if (
       (luxAlgoData?.polished_smart_trail == 1 && signal == "Short") ||
       (luxAlgoData?.polished_smart_trail == 0 && signal == "Long")
@@ -307,7 +308,11 @@ async function lasoFilters(lastCandle, signal) {
     } else {
       return {
         order: "Close",
-        reason: `Unclear Signal\n Smart Trail is : ${luxAlgoData?.polished_smart_trail}\n signal is : ${signal}`,
+        reason: `Unclear Signal\n Smart Trail is : ${
+          luxAlgoData?.polished_smart_trail
+        }\n signal is : ${signal}\nOverall Algo Data ${JSON.stringify(
+          luxAlgoData
+        )}`,
       };
     }
   } catch (err) {
