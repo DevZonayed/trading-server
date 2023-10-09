@@ -1,5 +1,8 @@
 const AsyncHandler = require("express-async-handler");
-const { TelegramPandaBite5MinInstance } = require("../service/Telegram");
+const {
+  TelegramPandaBite5MinInstance,
+  TelegramInstance,
+} = require("../service/Telegram");
 const TradeOrder = require("../model/TradeOrder");
 const TradingData = require("../model/TradingData");
 
@@ -12,7 +15,6 @@ const PsrLuxAlGoStretagy = AsyncHandler(async (req, res) => {
   let Message = TelegramPandaBite5MinInstance;
   let candle = req?.candle;
   let { type, name, time, timeframe } = candle;
-  console.log("Data Pushed");
   // type validation
   if (type != "LASO" && type != "PSR") {
     return res.status(400).json({
@@ -32,6 +34,10 @@ const PsrLuxAlGoStretagy = AsyncHandler(async (req, res) => {
 
   // Hndle LuxAlgo Signal
   if (type == "LASO") {
+    // Notify To Telegrame
+    let { data, ...restInfo } = candle;
+    TelegramInstance.basicCandleNotification(restInfo);
+
     // Pending Order Validation
     if (lastOrder?.status == "pending") {
       await lastOrderValidate(lastOrder, candle);

@@ -38,6 +38,37 @@ class Telegram {
       });
   }
 
+  basicCandleNotification(data) {
+    const {
+      name,
+      time,
+      timeframe,
+      open,
+      close,
+      high,
+      low,
+      bodySize,
+      upperTail,
+      lowerTail,
+      type,
+    } = data;
+
+    let message = `<b>${type} Data Pushed<b>
+<b>Name:</b> ${name}
+<b>Time:</b> ${time}
+<b>TimeFrame:</b> ${timeframe}
+<b>Open:</b> ${open}
+<b>Close:</b> ${close}
+<b>High:</b> ${high}
+<b>Low:</b> ${low}
+<b>BodySize:</b> ${bodySize}
+<b>UpperTail:</b> ${upperTail}
+<b>LowerTail:</b> ${lowerTail}
+`;
+
+    this.sendMessagehtml(message);
+  }
+
   falseOrder({ direction, reason }) {
     this.sendMessagehtml(
       `<b>A ${direction} Order is generated but not execute</b>\n<b><i>Reason:</i></b> ${reason}`
