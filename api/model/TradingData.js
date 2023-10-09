@@ -44,11 +44,11 @@ const tradingDataSchema = new mongoose.Schema(
       type: Number,
       require: true,
     },
-    upperTailMiddlePrice: {
+    longEntryPrice: {
       type: Number,
       require: true,
     },
-    lowerTailMiddlePrice: {
+    shortEntryPrice: {
       type: Number,
       require: true,
     },
