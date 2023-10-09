@@ -53,7 +53,7 @@ class Telegram {
       type,
     } = data;
 
-    let message = `<b>${type} Data Pushed<b>
+    let message = `<b>${type} Data Pushed</b>
 <b>Name:</b> ${name}
 <b>Time:</b> ${time}
 <b>TimeFrame:</b> ${timeframe}

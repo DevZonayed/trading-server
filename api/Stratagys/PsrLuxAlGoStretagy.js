@@ -15,8 +15,9 @@ const PsrLuxAlGoStretagy = AsyncHandler(async (req, res) => {
   let Message = TelegramPandaBite5MinInstance;
   let candle = req?.candle;
   let { type, name, time, timeframe } = candle;
+
   // type validation
-  if (type != "LASO" && type != "PSR") {
+  if (!(type == "LASO" || type == "PSR")) {
     return res.status(400).json({
       message: "Type is not suitable to this Strategy",
     });

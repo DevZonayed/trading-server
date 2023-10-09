@@ -12,7 +12,7 @@ const LastAlgoSignalMiddleware = AsyncHandler(async (req, res, next) => {
 
   let candleData = await organizeLaData(orgCandleData);
 
-  req.candle = candleData;
+  req.candle = { ...candleData.toObject(), type };
   return next();
 });
 
