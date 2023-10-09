@@ -81,9 +81,13 @@ const PsrLuxAlGoStretagy = AsyncHandler(async (req, res) => {
 
   // Check IS Trand Catcher Is Shift In the duration of the order
   if (lastOrder && !lastOrder?.StrategyData?.trandCatcherShift) {
-    return Message.falseOrder({
+    Message.falseOrder({
       direction: signal,
       reason: "There is no trand catcher shifting in the order duration!",
+    });
+
+    return res.json({
+      message: "success",
     });
   }
 
