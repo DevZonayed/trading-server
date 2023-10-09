@@ -4,6 +4,7 @@ const TradingData = require("../../model/TradingData");
 const { parseStringToObject } = require("../../helper/stringToObject");
 
 const PROFIT_TAKE_PERCENTAGE = [0.3, 1, 3];
+const ENTRY_PRICE_PERCENTAGE = 0.02;
 
 const OrgCandleData = AsyncHandler(async (req, res, next) => {
   // let bodyData = csvStringToObject(req.body)[0];
@@ -13,13 +14,21 @@ const OrgCandleData = AsyncHandler(async (req, res, next) => {
   if (open && close && high && low && time && timeframe && name) {
     let tailSize = calculateTailSizePercentage({ open, close, high, low });
     let bodySize = calculateBodySizePercentage({ open, close, high, low });
-    let upperTailMiddlePrice = (+high + Math.max(+open, +close)) / 2;
-    let lowerTailMiddlePrice = (+low + Math.min(+open, +close)) / 2;
+    let longEntryPrice = calculateTargetPrice(
+      +close,
+      ENTRY_PRICE_PERCENTAGE,
+      true
+    );
+    let shortEntryPrice = calculateTargetPrice(
+      +close,
+      ENTRY_PRICE_PERCENTAGE,
+      false
+    );
 
     // Includes longProfitTakeZones, shortProfitTakeZones,
     let profitZones = generateTakePrifitPrices(
-      upperTailMiddlePrice,
-      lowerTailMiddlePrice,
+      longEntryPrice,
+      shortEntryPrice,
       PROFIT_TAKE_PERCENTAGE
     );
     let candleData = {
@@ -33,8 +42,8 @@ const OrgCandleData = AsyncHandler(async (req, res, next) => {
       bodySize,
       upperTail: tailSize.upperTail,
       lowerTail: tailSize.lowerTail,
-      upperTailMiddlePrice,
-      lowerTailMiddlePrice,
+      longEntryPrice,
+      shortEntryPrice,
       ...profitZones,
       data: restData,
     };

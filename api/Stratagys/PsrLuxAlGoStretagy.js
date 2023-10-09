@@ -108,10 +108,10 @@ const PsrLuxAlGoStretagy = AsyncHandler(async (req, res) => {
   let entryPrice = 0;
   let profitTakeZones = [];
   if (signal == "Short") {
-    entryPrice = candle.lowerTailMiddlePrice;
+    entryPrice = candle.shortEntryPrice;
     profitTakeZones = candle.shortProfitTakeZones;
   } else if (signal == "Long") {
-    entryPrice = candle.upperTailMiddlePrice;
+    entryPrice = candle.longEntryPrice;
     profitTakeZones = candle.longProfitTakeZones;
   }
 
