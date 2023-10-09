@@ -311,7 +311,7 @@ async function lasoFilters(lastCandle, signal) {
         reason: `Unclear Signal\n Smart Trail is : ${
           luxAlgoData?.polished_smart_trail
         }\n signal is : ${signal}\nOverall Algo Data ${JSON.stringify(
-          luxAlgoData
+          lastCandle
         )}`,
       };
     }
