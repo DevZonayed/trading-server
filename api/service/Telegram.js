@@ -37,6 +37,32 @@ class Telegram {
         console.error(err);
       });
   }
+
+  falseOrder({ direction, reason }) {
+    this.sendMessagehtml(
+      `<b>A ${direction} Order is generated but not execute</b>\n<b><i>Reason:</i></b> ${reason}`
+    );
+  }
+
+  createOrder({ direction, exchange, leverage, entry, targets, coin }) {
+    let target = "";
+    targets.map((item, index) => {
+      if (targets.length == index + 1) {
+        target += ` ${item}`;
+      } else {
+        target += ` ${item},`;
+      }
+    });
+
+    let message = `COIN: ${coin}\nDirection: ${direction}\nExchange: ${exchange}\nLeverage: ${leverage}\nENTRY: ${entry}\nTARGET: ${target}`;
+
+    this.sendMessage(message);
+  }
+
+  closeOrder({ coin }) {
+    let message = `CLOSE ${coin}`;
+    this.sendMessage(message);
+  }
 }
 
 const TelegramInstance = new Telegram(BOT_TOKEN, GROUP_ID);

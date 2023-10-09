@@ -1,7 +1,8 @@
 const TradingData = require("../../../model/TradingData");
 
-async function organizeLaData(allData, type) {
+async function organizeLaData(allData) {
   try {
+    const { name, timeframe, open, close, high, low, _id, type } = allData;
     const {
       bullish,
       bullish_plus,
@@ -10,33 +11,20 @@ async function organizeLaData(allData, type) {
       bullish_exit,
       bearish_exit,
       trand_strength,
-      take_profit,
-      stop_loss,
       bar_color_value,
       trend_tracer,
       trend_catcher,
       smart_trail,
-      // smart_trail_extremity,
-      open,
-      close,
-      high,
-      low,
     } = allData?.data[type];
-
-    const { name, timeframe, _id } = allData;
 
     let Data = {
       signal: null,
       isClose: null,
       polished_trend_catcher: null,
-      take_profit,
-      stop_loss,
+      polished_smart_trail: null,
       trand_strength,
-      barColor: bar_color_value,
-      smart_trail,
+      barColor: Number(bar_color_value),
       trend_tracer,
-      upperTail: null,
-      lowerTail: null,
       entryAmaunt: null,
     };
 
@@ -55,33 +43,71 @@ async function organizeLaData(allData, type) {
     }
 
     //   Prev Candle Data
-    const prevCandle = await TradingData.find({ name, timeframe })
+    const prevCandles = await TradingData.find({ name, timeframe })
       .sort({
         createdAt: -1,
       })
-      .limit(2);
+      .limit(6);
 
     // Trand Catcher
-    let trend_catcherLocal = null;
-    if (prevCandle[1]) {
-      let laData = prevCandle[1]?.data[type];
+    let trand_catcherLocal = null;
+    let smart_trailLocal = null;
+    if (prevCandles[1]) {
+      let laData = prevCandles[1]?.data[type];
       if (laData) {
-        trend_catcherLocal =
+        // Trand Catcher Local
+        trand_catcherLocal =
           +laData.trend_catcher < +trend_catcher
             ? 1
             : +laData.trend_catcher > +trend_catcher
             ? 0
             : laData.polished_trend_catcher;
+
+        // Smart trail Local
+        smart_trailLocal =
+          +laData.smart_trail < +smart_trail
+            ? 1
+            : +laData.smart_trail > +smart_trail
+            ? 0
+            : laData.polished_smart_trail;
       }
     }
 
-    // Candle Tail Length
-    let tailSize = {};
-    let bodySize = 0;
-    if (open && close && high && low) {
-      tailSize = calculateTailSizePercentage({ open, close, high, low });
-      bodySize = calculateBodySizePercentage({ open, close, high, low });
-    }
+    // Previous Candle Interection
+    let prevCandleData = [...prevCandles].slice(1);
+    let prevLaData = prevCandleData.map((candleData) => {
+      return candleData.data[type];
+    });
+
+    let laSTData = prevLaData.map((item) => ({
+      smart_trail: item?.polished_smart_trail,
+      trand_catcher: item?.polished_trend_catcher,
+    }));
+
+    let isTrandCatcherStraight = allElementsAreEqual(
+      laSTData.map((item) => item.trand_catcher)
+    );
+    let isSmartTrailStraight = allElementsAreEqual(
+      laSTData.map((item) => item.smart_trail)
+    );
+
+    let trandCatcherShift = !allElementsAreEqual([
+      laSTData[0]?.trand_catcher,
+      trand_catcherLocal,
+    ])
+      ? laSTData[0]?.trand_catcher < trand_catcherLocal
+        ? "Long"
+        : "Short"
+      : false;
+
+    let smartTrailShift = !allElementsAreEqual([
+      laSTData[0]?.smart_trail,
+      smart_trailLocal,
+    ])
+      ? laSTData[0]?.smart_trail < smart_trailLocal
+        ? "Long"
+        : "Short"
+      : false;
 
     // Order Entry Amount
     let entryAmaunt = null;
@@ -101,13 +127,16 @@ async function organizeLaData(allData, type) {
       signal,
       isClose,
       entryAmaunt,
-      polished_trend_catcher: trend_catcherLocal,
-      bodySize,
-      ...tailSize,
+      polished_trend_catcher: trand_catcherLocal,
+      polished_smart_trail: smart_trailLocal,
+      trandCatcherShift,
+      smartTrailShift,
+      isTrandCatcherStraight,
+      isSmartTrailStraight,
     };
 
     // Update to database
-    await TradingData.findOneAndUpdate(
+    let updatedData = await TradingData.findOneAndUpdate(
       { _id: _id },
       {
         $set: Object.entries(Data).reduce((update, [key, value]) => {
@@ -118,7 +147,7 @@ async function organizeLaData(allData, type) {
       { new: true }
     );
 
-    return Data;
+    return updatedData;
   } catch (err) {
     console.log(err);
   }
@@ -126,38 +155,15 @@ async function organizeLaData(allData, type) {
 
 module.exports = organizeLaData;
 
-/**
- * Calcualte the upper tail and lower tail percentage
- * @param {Candle Data} candle
- * @returns
- */
-function calculateTailSizePercentage(candle) {
-  let { open, close, high, low } = candle;
-
-  open = +open;
-  close = +close;
-  high = +high;
-  low = +low;
-
-  // Calculate the upper and lower tails
-  const upperTail = high - Math.max(open, close);
-  const lowerTail = Math.min(open, close) - low;
-
-  // Calculate the tail size percentage compared to the close
-  const upperTailPercentage = ((upperTail / close) * 100).toFixed(2);
-  const lowerTailPercentage = ((lowerTail / close) * 100).toFixed(2);
-
-  return { upperTail: +upperTailPercentage, lowerTail: +lowerTailPercentage };
-}
-
-function calculateBodySizePercentage(candle) {
-  let { open, close } = candle;
-
-  open = +open;
-  close = +close;
-
-  // Calculate the candle body size percentage compared to the close
-  const bodySizePercentage = (((close - open) / close) * 100).toFixed(2);
-
-  return +bodySizePercentage;
+// Check all the item is equal or not
+function allElementsAreEqual(array) {
+  if (array.every((el) => el === undefined)) {
+    return false;
+  }
+  for (let i = 1; i < array.length; i++) {
+    if (array[i] !== array[0]) {
+      return false;
+    }
+  }
+  return true;
 }
