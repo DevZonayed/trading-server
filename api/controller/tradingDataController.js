@@ -8,24 +8,6 @@ const {
   getDiffrenceOfUpperAndLowerForBB,
 } = require("../utils/BB/BolingerBands");
 
-// exports.createTradingData = async (req, res) => {
-//   try {
-//     if (!Object.values(req.body).includes("")) {
-//       const newData = new TradingData({
-//         data: JSON.stringify(req.body),
-//       });
-//       await newData.save();
-//     }
-//     console.log("//================================//");
-//     console.log(req.body);
-//     res.status(201).json({
-//       message: "Success",
-//     });
-//   } catch (error) {
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// };
-
 /**
  * @route /api/v1/trading-data
  * @param {*} req
@@ -35,7 +17,6 @@ const {
 exports.updateTradingData = async (req, res) => {
   try {
     let bodyData = csvStringToObject(req.body);
-    console.log(bodyData[0]);
     let { name, time, timeframe, type, ...restData } = bodyData[0];
 
     // Check if the type key exists in the data payload
