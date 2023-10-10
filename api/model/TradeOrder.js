@@ -54,7 +54,7 @@ tradeOrderSchema.pre("save", function (next) {
     }
   } else if (this.isModified("reason")) {
     if (this.status == "closed") {
-      if (this.reason !== "") {
+      if (this.reason == "") {
         closeOrder(this);
       } else {
         falseOrder(this);
