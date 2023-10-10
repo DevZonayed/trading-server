@@ -16,6 +16,9 @@ const PsrLuxAlGoStretagy = AsyncHandler(async (req, res) => {
   let candle = req?.candle;
   let { type, name, time, timeframe } = candle;
 
+  // Condition for order exutable or not ?
+  let isOrderExecutable = candle.data?.PSR && candle.data?.LASO;
+
   // type validation
   if (!(type == "LASO" || type == "PSR")) {
     return res.status(400).json({
@@ -33,12 +36,13 @@ const PsrLuxAlGoStretagy = AsyncHandler(async (req, res) => {
     createdAt: -1,
   });
 
-  // Hndle LuxAlgo Signal
+  // Notify To Telegrame
   if (type == "LASO") {
-    // Notify To Telegrame
     let { data, ...restInfo } = candle;
     TelegramInstance.basicCandleNotification(restInfo);
-
+  }
+  // Hndle LuxAlgo Signal
+  if (type == "LASO" && !isOrderExecutable) {
     // Pending Order Validation
     if (lastOrder?.status == "pending") {
       await lastOrderValidate(lastOrder, candle);
@@ -71,6 +75,12 @@ const PsrLuxAlGoStretagy = AsyncHandler(async (req, res) => {
       }
     }
     return res.status(201).json({
+      message: "Success",
+    });
+  }
+
+  if (!isOrderExecutable) {
+    return res.json({
       message: "Success",
     });
   }
