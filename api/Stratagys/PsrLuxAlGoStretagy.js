@@ -14,7 +14,7 @@ const WAITING_CANDLE_COUNT = 5;
 const PsrLuxAlGoStretagy = AsyncHandler(async (req, res) => {
   let Message = TelegramPandaBite5MinInstance;
   let candle = req?.candle;
-  let { type, name, time, timeframe } = candle;
+  let { type, name, time, timeframe, _id } = candle;
 
   // Condition for order exutable or not ?
   let isOrderExecutable = candle.data?.PSR && candle.data?.LASO;
@@ -153,16 +153,7 @@ const PsrLuxAlGoStretagy = AsyncHandler(async (req, res) => {
   }
 
   // Last Candle Data
-  let lastCandle = await TradingData.find({
-    name,
-    timeframe,
-    "data.LASO": { $exists: true },
-  })
-    .sort({
-      createdAt: -1,
-    })
-    .limit(1);
-  lastCandle = lastCandle[0];
+  let lastCandle = await TradingData.findById(_id);
   if (!lastCandle) {
     OrderObject = {
       ...OrderObject,
@@ -177,7 +168,7 @@ const PsrLuxAlGoStretagy = AsyncHandler(async (req, res) => {
   }
 
   // Other Conditions
-  let filterResult = await lasoFilters(candle, signal);
+  let filterResult = await lasoFilters(lastCandle, signal);
   if (filterResult.order == "Hold") {
     OrderObject = {
       ...OrderObject,
@@ -297,7 +288,7 @@ function isCandleAppropriate(candleData) {
 
 async function lasoFilters(lastCandle, signal) {
   try {
-    let luxAlgoData = lastCandle?.data?.LASO;
+    let luxAlgoData = lastCandle.data?.LASO;
 
     if (
       (luxAlgoData?.polished_smart_trail == 1 && signal == "Short") ||
