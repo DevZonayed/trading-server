@@ -11,16 +11,19 @@ const EXCHANGE = "Binance Futures, ByBIt USDT";
 const LEVERAGE = "Isolated 1x";
 const WAITING_CANDLE_COUNT = 5;
 
+const REQUERED_DATA = ["LASO", "PSR"];
+
 const PsrLuxAlGoStretagy = AsyncHandler(async (req, res) => {
   let Message = TelegramPandaBite5MinInstance;
   let candle = req?.candle;
   let { type, name, time, timeframe, _id } = candle;
 
   // Condition for order exutable or not ?
-  let isOrderExecutable = candle.data?.PSR && candle.data?.LASO;
+  let isOrderExecutable =
+    candle.data[REQUERED_DATA[0]] && candle.data[REQUERED_DATA[1]];
 
   // type validation
-  if (!(type == "LASO" || type == "PSR")) {
+  if (!REQUERED_DATA.includes(type)) {
     return res.status(400).json({
       message: "Type is not suitable to this Strategy",
     });
@@ -37,42 +40,41 @@ const PsrLuxAlGoStretagy = AsyncHandler(async (req, res) => {
   });
 
   // Notify To Telegrame
-  if (type == "LASO") {
+  if (type == REQUERED_DATA[0]) {
     let { data, ...restInfo } = candle;
     TelegramInstance.basicCandleNotification(restInfo);
   }
   // Hndle LuxAlgo Signal
-  if (type == "LASO" && !isOrderExecutable) {
+  if (type == REQUERED_DATA[0] && !isOrderExecutable) {
     // Pending Order Validation
     if (lastOrder?.status == "pending") {
       await lastOrderValidate(lastOrder, candle);
     } else if (lastOrder?.status == "running") {
       // Trand Catcher Shifting
-      if (candle.data?.LASO?.trandCatcherShift) {
+      if (candle.data[REQUERED_DATA[0]]?.trandCatcherShift) {
         lastOrder.StrategyData = {
           ...lastOrder.StrategyData,
           trandCatcherShift: true,
         };
-        lastOrder.save();
       }
       // smart Trail Shift
-      if (candle.data?.LASO?.smartTrailShift) {
+      if (candle.data[REQUERED_DATA[0]]?.smartTrailShift) {
         lastOrder.StrategyData = {
           ...lastOrder.StrategyData,
           smartTrailShift: true,
         };
-        lastOrder.save();
       }
 
       let direction = lastOrder.direction;
       if (
         (direction == "Long" &&
-          candle.data?.LASO?.trandCatcherShift == "Short") ||
-        (direction == "Short" && candle.data?.LASO?.trandCatcherShift == "Long")
+          candle.data[REQUERED_DATA[0]]?.trandCatcherShift == "Short") ||
+        (direction == "Short" &&
+          candle.data[REQUERED_DATA[0]]?.trandCatcherShift == "Long")
       ) {
         lastOrder.status = "closed";
-        await lastOrder.save();
       }
+      await lastOrder.save();
     }
     return res.status(201).json({
       message: "Success",
@@ -87,11 +89,14 @@ const PsrLuxAlGoStretagy = AsyncHandler(async (req, res) => {
 
   // Signal Identify
   let signal = null;
-  if (candle?.data[type]?.Long == 1 || candle?.data[type]?.Long == "1") {
+  if (
+    candle?.data[REQUERED_DATA[1]]?.Long == 1 ||
+    candle?.data[REQUERED_DATA[1]]?.Long == "1"
+  ) {
     signal = "Long";
   } else if (
-    candle?.data[type]?.Short == 1 ||
-    candle?.data[type]?.Short == "1"
+    candle?.data[REQUERED_DATA[1]]?.Short == 1 ||
+    candle?.data[REQUERED_DATA[1]]?.Short == "1"
   ) {
     signal = "Short";
   }
@@ -217,7 +222,7 @@ module.exports = PsrLuxAlGoStretagy;
  */
 async function lastOrderValidate(orderData, candleData) {
   try {
-    let luxAlgoData = candleData.data["LASO"];
+    let luxAlgoData = candleData.data[REQUERED_DATA[0]];
     let orderDirection = orderData.direction;
     if (
       (luxAlgoData?.smartTrailShift == "Short" && orderDirection == "Short") ||
@@ -288,7 +293,7 @@ function isCandleAppropriate(candleData) {
 
 async function lasoFilters(lastCandle, signal) {
   try {
-    let luxAlgoData = lastCandle.data?.LASO;
+    let luxAlgoData = lastCandle.data[REQUERED_DATA[0]];
 
     if (
       (luxAlgoData?.polished_smart_trail == 1 && signal == "Short") ||
