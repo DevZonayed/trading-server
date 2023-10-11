@@ -3,7 +3,7 @@ const AsyncHandler = require("express-async-handler");
 const TradingData = require("../../model/TradingData");
 const { parseStringToObject } = require("../../helper/stringToObject");
 
-const PROFIT_TAKE_PERCENTAGE = [0.3, 1, 3];
+const PROFIT_TAKE_PERCENTAGE = [0.25, 1, 2];
 const ENTRY_PRICE_PERCENTAGE = 0.02;
 
 const OrgCandleData = AsyncHandler(async (req, res, next) => {
