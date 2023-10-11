@@ -10,11 +10,11 @@ const STRAATEGY_NAME = "PsrLuxAlGoStretagy";
 const EXCHANGE = "Binance Futures, ByBIt USDT";
 const LEVERAGE = "Isolated 1x";
 const WAITING_CANDLE_COUNT = 5;
-
 const REQUERED_DATA = ["LASO", "PSR"];
 
 const PsrLuxAlGoStretagy = AsyncHandler(async (req, res) => {
   let Message = TelegramPandaBite5MinInstance;
+  let Notify = TelegramInstance;
   let candle = req?.candle;
   let { type, name, time, timeframe, _id } = candle;
 
@@ -76,6 +76,11 @@ const PsrLuxAlGoStretagy = AsyncHandler(async (req, res) => {
   }
 
   if (!isOrderExecutable) {
+    Notify.sendMessage(
+      `One of the required Data Not Found!\n LASO : ${
+        candle.data[REQUERED_DATA[0]] ? "Found" : "Not Found"
+      }\nPSR:${candle.data[REQUERED_DATA[1]] ? "Found" : "Not Found"}`
+    );
     return res.json({
       message: "Success",
     });
@@ -201,6 +206,12 @@ const PsrLuxAlGoStretagy = AsyncHandler(async (req, res) => {
     return res.json({
       message: "success",
     });
+  } else {
+    Notify.sendMessage(
+      `Order Generated But somehow Not execute\n Filter Return ${JSON.stringify(
+        filterResult
+      )}\n Candle Data : ${candle}`
+    );
   }
 
   return res.json({
@@ -237,7 +248,7 @@ async function lastOrderValidate(orderData, candleData) {
       (luxAlgoData?.smartTrailShift == "Short" && orderDirection == "Short") ||
       (luxAlgoData?.smartTrailShift == "Long" && orderDirection == "Long")
     ) {
-      await TradeOrder.findOneAndUpdate(
+      return await TradeOrder.findOneAndUpdate(
         {
           _id: orderData._id,
         },
@@ -249,7 +260,7 @@ async function lastOrderValidate(orderData, candleData) {
         }
       );
     } else {
-      await TradeOrder.findOneAndUpdate(
+      return await TradeOrder.findOneAndUpdate(
         {
           _id: orderData._id,
         },
@@ -261,8 +272,6 @@ async function lastOrderValidate(orderData, candleData) {
         }
       );
     }
-
-    return;
   } catch (err) {
     console.error(err);
   }
