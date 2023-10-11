@@ -97,10 +97,10 @@ class Telegram {
 }
 
 const TelegramInstance = new Telegram(BOT_TOKEN, GROUP_ID);
-// const TelegramPandaBite5MinInstance = new Telegram(
-//   BOT_TOKEN,
-//   PandaBite5MinScalping
-// );
-const TelegramPandaBite5MinInstance = new Telegram(BOT_TOKEN, GROUP_ID);
+const TelegramPandaBite5MinInstance = new Telegram(
+  BOT_TOKEN,
+  PandaBite5MinScalping
+);
+// const TelegramPandaBite5MinInstance = new Telegram(BOT_TOKEN, GROUP_ID);
 
 module.exports = { TelegramInstance, TelegramPandaBite5MinInstance };
