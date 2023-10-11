@@ -65,13 +65,7 @@ const PsrLuxAlGoStretagy = AsyncHandler(async (req, res) => {
         };
       }
 
-      let direction = lastOrder.direction;
-      if (
-        (direction == "Long" &&
-          candle.data[REQUERED_DATA[0]]?.trandCatcherShift == "Short") ||
-        (direction == "Short" &&
-          candle.data[REQUERED_DATA[0]]?.trandCatcherShift == "Long")
-      ) {
+      if (candle.data[REQUERED_DATA[0]]?.trandCatcherShift) {
         lastOrder.status = "closed";
       }
       await lastOrder.save();
@@ -228,31 +222,44 @@ async function lastOrderValidate(orderData, candleData) {
       (luxAlgoData?.smartTrailShift == "Short" && orderDirection == "Short") ||
       (luxAlgoData?.smartTrailShift == "Long" && orderDirection == "Long")
     ) {
+      await TradeOrder.findOneAndUpdate(
+        {
+          _id: orderData._id,
+        },
+        {
+          status: "running",
+        },
+        {
+          new: true,
+        }
+      );
+    } else {
       if (orderData.waitingCandleCount <= WAITING_CANDLE_COUNT) {
         await TradeOrder.findOneAndUpdate(
           {
             _id: orderData._id,
           },
           {
+            $inc: { waitingCandleCount: 1 },
+          },
+          {
+            new: true,
+          }
+        );
+      } else {
+        await TradeOrder.findOneAndUpdate(
+          {
+            _id: orderData._id,
+          },
+          {
             status: "running",
+            reason: "Waiting Period is over",
           },
           {
             new: true,
           }
         );
       }
-    } else {
-      await TradeOrder.findOneAndUpdate(
-        {
-          _id: orderData._id,
-        },
-        {
-          $inc: { waitingCandleCount: 1 },
-        },
-        {
-          new: true,
-        }
-      );
     }
 
     return;
