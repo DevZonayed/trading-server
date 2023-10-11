@@ -46,25 +46,25 @@ const PsrLuxAlGoStretagy = AsyncHandler(async (req, res) => {
   }
   // Hndle LuxAlgo Signal
   if (type == REQUERED_DATA[0] && !isOrderExecutable) {
+    // Trand Catcher Shifting
+    if (candle.data[REQUERED_DATA[0]]?.trandCatcherShift) {
+      lastOrder.StrategyData = {
+        ...lastOrder.StrategyData,
+        trandCatcherShift: true,
+      };
+    }
+    // smart Trail Shift
+    if (candle.data[REQUERED_DATA[0]]?.smartTrailShift) {
+      lastOrder.StrategyData = {
+        ...lastOrder.StrategyData,
+        smartTrailShift: true,
+      };
+    }
+
     // Pending Order Validation
     if (lastOrder?.status == "pending") {
       await lastOrderValidate(lastOrder, candle);
     } else if (lastOrder?.status == "running") {
-      // Trand Catcher Shifting
-      if (candle.data[REQUERED_DATA[0]]?.trandCatcherShift) {
-        lastOrder.StrategyData = {
-          ...lastOrder.StrategyData,
-          trandCatcherShift: true,
-        };
-      }
-      // smart Trail Shift
-      if (candle.data[REQUERED_DATA[0]]?.smartTrailShift) {
-        lastOrder.StrategyData = {
-          ...lastOrder.StrategyData,
-          smartTrailShift: true,
-        };
-      }
-
       if (candle.data[REQUERED_DATA[0]]?.trandCatcherShift) {
         lastOrder.status = "closed";
       }
@@ -218,6 +218,21 @@ async function lastOrderValidate(orderData, candleData) {
   try {
     let luxAlgoData = candleData.data[REQUERED_DATA[0]];
     let orderDirection = orderData.direction;
+    if (orderData.waitingCandleCount > WAITING_CANDLE_COUNT) {
+      return await TradeOrder.findOneAndUpdate(
+        {
+          _id: orderData._id,
+        },
+        {
+          status: "closed",
+          reason: "Waiting Period is over",
+        },
+        {
+          new: true,
+        }
+      );
+    }
+
     if (
       (luxAlgoData?.smartTrailShift == "Short" && orderDirection == "Short") ||
       (luxAlgoData?.smartTrailShift == "Long" && orderDirection == "Long")
@@ -234,32 +249,17 @@ async function lastOrderValidate(orderData, candleData) {
         }
       );
     } else {
-      if (orderData.waitingCandleCount <= WAITING_CANDLE_COUNT) {
-        await TradeOrder.findOneAndUpdate(
-          {
-            _id: orderData._id,
-          },
-          {
-            $inc: { waitingCandleCount: 1 },
-          },
-          {
-            new: true,
-          }
-        );
-      } else {
-        await TradeOrder.findOneAndUpdate(
-          {
-            _id: orderData._id,
-          },
-          {
-            status: "running",
-            reason: "Waiting Period is over",
-          },
-          {
-            new: true,
-          }
-        );
-      }
+      await TradeOrder.findOneAndUpdate(
+        {
+          _id: orderData._id,
+        },
+        {
+          $inc: { waitingCandleCount: 1 },
+        },
+        {
+          new: true,
+        }
+      );
     }
 
     return;
