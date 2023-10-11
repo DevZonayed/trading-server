@@ -29,6 +29,8 @@ const PsrLuxAlGoStretagy = AsyncHandler(async (req, res) => {
     });
   }
 
+  console.log(isOrderExecutable);
+
   // Get Latest Pending Order
   let lastOrder = await TradeOrder.findOne({
     name: STRAATEGY_NAME,
@@ -48,17 +50,15 @@ const PsrLuxAlGoStretagy = AsyncHandler(async (req, res) => {
   if (type == REQUERED_DATA[0] && !isOrderExecutable) {
     // Trand Catcher Shifting
     if (candle.data[REQUERED_DATA[0]]?.trandCatcherShift) {
-      lastOrder.StrategyData = {
-        ...lastOrder.StrategyData,
-        trandCatcherShift: true,
-      };
+      lastOrder.StrategyData = lastOrder.StrategyData
+        ? { ...lastOrder.StrategyData, trandCatcherShift: true }
+        : { trandCatcherShift: true };
     }
     // smart Trail Shift
     if (candle.data[REQUERED_DATA[0]]?.smartTrailShift) {
-      lastOrder.StrategyData = {
-        ...lastOrder.StrategyData,
-        smartTrailShift: true,
-      };
+      lastOrder.StrategyData = lastOrder.StrategyData
+        ? { ...lastOrder.StrategyData, smartTrailShift: true }
+        : { smartTrailShift: true };
     }
 
     // Pending Order Validation
