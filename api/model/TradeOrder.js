@@ -44,38 +44,42 @@ const tradeOrderSchema = new mongoose.Schema(
 );
 
 tradeOrderSchema.pre("save", function (next) {
-  if (this.isModified("status")) {
-    if (this.status == "running") {
-      orderRunning(this);
-    } else if (this.status == "pending") {
-      orderPending(this);
-    } else if (this.status == "closed") {
+  if (this.isModified("reason") && this.isModified("status")) {
+    if (doc.status == "closed") {
+      falseOrder(doc);
+    }
+  } else if (this.isModified("status")) {
+    if (doc.status == "running") {
+      orderRunning(doc);
+    } else if (doc.status == "pending") {
+      orderPending(doc);
+    } else if (doc.status == "closed") {
       if (this.reason == "") {
         closeOrder(this);
       } else {
         falseOrder(this);
       }
     }
-  } else if (this.isModified("reason")) {
-    if (this.status == "closed") {
-      falseOrder(this);
-    }
   }
   next();
 });
 
 tradeOrderSchema.post("updateOne", function (doc, next) {
-  if (this.isModified("status")) {
+  if (this.isModified("reason") && this.isModified("status")) {
+    if (doc.status == "closed") {
+      falseOrder(doc);
+    }
+  } else if (this.isModified("status")) {
     if (doc.status == "running") {
       orderRunning(doc);
     } else if (doc.status == "pending") {
       orderPending(doc);
     } else if (doc.status == "closed") {
-      closeOrder(doc);
-    }
-  } else if (this.isModified("reason")) {
-    if (doc.status == "closed") {
-      falseOrder(doc);
+      if (this.reason == "") {
+        closeOrder(this);
+      } else {
+        falseOrder(this);
+      }
     }
   }
   next();
