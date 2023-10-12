@@ -61,20 +61,17 @@ tradeOrderSchema.pre("save", function (next) {
 });
 
 tradeOrderSchema.post("updateOne", function (doc, next) {
-  if (this.isModified("status")) {
-    if (doc.status == "running") {
-      orderRunning(doc);
-    } else if (doc.status == "pending") {
-      orderPending(doc);
-    } else if (doc.status == "closed") {
-      if (doc.reason == "") {
-        closeOrder(this);
-      } else {
-        falseOrder(this);
-      }
+  if (doc.status == "running") {
+    orderRunning(doc);
+  } else if (doc.status == "pending") {
+    orderPending(doc);
+  } else if (doc.status == "closed") {
+    if (doc.reason == "") {
+      closeOrder(this);
+    } else {
+      falseOrder(this);
     }
   }
-  next();
 });
 
 module.exports = mongoose.model("TradeOrder", tradeOrderSchema);
