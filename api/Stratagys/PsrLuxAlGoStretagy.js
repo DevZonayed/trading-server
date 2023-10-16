@@ -29,8 +29,6 @@ const PsrLuxAlGoStretagy = AsyncHandler(async (req, res) => {
     });
   }
 
-  console.log(isOrderExecutable);
-
   // Get Latest Pending Order
   let lastOrder = await TradeOrder.findOne({
     name: STRAATEGY_NAME,
@@ -65,7 +63,12 @@ const PsrLuxAlGoStretagy = AsyncHandler(async (req, res) => {
     if (lastOrder?.status == "pending") {
       await lastOrderValidate(lastOrder, candle);
     } else if (lastOrder?.status == "running") {
-      if (candle.data[REQUERED_DATA[0]]?.trandCatcherShift) {
+      if (
+        (lastOrder.direction == "Short" &&
+          candle.data[REQUERED_DATA[0]]?.trandCatcherShift == "Long") ||
+        (lastOrder.direction == "Long" &&
+          candle.data[REQUERED_DATA[0]]?.trandCatcherShift == "Short")
+      ) {
         lastOrder.status = "closed";
       }
       await lastOrder.save();
@@ -113,9 +116,10 @@ const PsrLuxAlGoStretagy = AsyncHandler(async (req, res) => {
   }
 
   // Watch for previous pending order
-  if (lastOrder?.status == "pending") {
+  if (lastOrder?.status == "pending" || lastOrder?.status == "running") {
     lastOrder.status = "closed";
-    lastOrder.reason = "On Hold Order is Closed Due to a new Signal";
+    lastOrder.reason =
+      lastOrder?.status + " Order is Closed Due to a new Signal";
     await lastOrder.save();
   }
 
