@@ -321,7 +321,10 @@ async function lasoFilters(lastCandle, signal) {
     ) {
       return {
         order: "Hold",
-        reason: "Smart Trail Positon is not good",
+        reason:
+          "Smart Trail Positon is not good\n" +
+          "Smart Trail is" +
+          luxAlgoData?.polished_smart_trail,
       };
     } else if (
       (luxAlgoData?.polished_smart_trail == 0 && signal == "Short") ||
