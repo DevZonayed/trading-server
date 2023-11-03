@@ -12,6 +12,7 @@ const scheduleJobs = require("./api/schedules/scheduleJob");
 
 const path = require("path");
 const TradingRoute = require("./api/router/tradingDataRoutes");
+const CandleRoute = require("./api/router/CandleDataRoutes");
 
 // Schedule Job
 scheduleJobs();
@@ -45,9 +46,10 @@ app.set("trust proxy", true);
 
 // Routes
 app.use("/api/v1/trading-data", TradingRoute);
-app.post("/", (req, res) => {
+app.use("/api/v1/candle-data", CandleRoute);
+app.get("/", (req, res) => {
   res.json({
-    message: "Post Success",
+    message: "Api is working",
   });
 });
 app.get("/api/v1", (req, res) => {

@@ -1,5 +1,6 @@
 const errorMiddleware = (err, req, res, next) => {
   const statusCode = res.statusCode === 2000 ? 500 : res.statusCode;
+  console.log(err.message)
   res.status(statusCode);
   res.json({
     message: err.message,
