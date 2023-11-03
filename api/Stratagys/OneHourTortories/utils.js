@@ -192,7 +192,20 @@ function upperCross(candles, keyPath) {
 }
 
 /**
- * Check for an under cross event. Single Line cross
+ * Check for an upper cross event. Single Line Cross Every value Change
+ * @param {Array} candles - Array of unsorted candle objects.
+ * @param {String} keyPath - The key or path to the key for the value to check.
+ * @returns {Boolean} - True if an upper cross event is found, false otherwise.
+ */
+function turningBullish(candles, keyPath) {
+  if (candles.length < 2) return false;
+  const sortedCandles = sortCandlesDescending(candles);
+  const [latestValue, prevValue] = sortedCandles.slice(0, 2).map(candle => getValueByKeyPath(candle, keyPath));
+  return latestValue > prevValue;
+}
+
+/**
+ * Check for an under cross event. Single Line cross Every Value
  * @param {Array} candles - Array of unsorted candle objects.
  * @param {String} keyPath - The key or path to the key for the value to check.
  * @returns {Boolean} - True if an under cross event is found, false otherwise.
@@ -205,7 +218,18 @@ function underCross(candles, keyPath) {
 }
 
 
-
+/**
+ * Check for an under cross event. Single Line cross Every Value Change
+ * @param {Array} candles - Array of unsorted candle objects.
+ * @param {String} keyPath - The key or path to the key for the value to check.
+ * @returns {Boolean} - True if an under cross event is found, false otherwise.
+ */
+function turningBearish(candles, keyPath) {
+  if (candles.length < 2) return false;
+  const sortedCandles = sortCandlesDescending(candles);
+  const [latestValue, prevValue] = sortedCandles.slice(0, 2).map(candle => getValueByKeyPath(candle, keyPath));
+  return latestValue < prevValue;
+}
 
 /**
  * Checks if there's been a crossover between two keys within the same candle or between consecutive candles.
@@ -273,5 +297,7 @@ module.exports = {
   underCross,
   crossover,
   crossunder,
-  sortCandlesDescending
+  sortCandlesDescending,
+  turningBullish,
+  turningBearish
 };
