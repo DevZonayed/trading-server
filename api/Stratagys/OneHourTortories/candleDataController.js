@@ -126,10 +126,10 @@ const initialCandleCalculation = AsyncHandler(async (req, res, next) => {
     prevCandles = sortCandlesDescending(prevCandles)
 
     // Detact Trend Catcher Shift
-    let trendCatcherShift = upperCross(prevCandles , "data.trendCatcher") ? "Long" : underCross(prevCandles , "data.trendCatcher") ? "Short" : prevCandles[1]?.data?.trendCatcher;
+    let trendCatcherShift = upperCross(prevCandles , "data.trendCatcher") ? "Long" : underCross(prevCandles , "data.trendCatcher") ? "Short" : prevCandles[1]?.data?.trendCatcherShift;
 
     // Detact Smart Trail Shift
-    let smartTrailShift = upperCross(prevCandles , "data.smartTrail") ? "Long" : underCross(prevCandles , "data.smartTrail") ? "Short" : prevCandles[1]?.data?.smartTrail
+    let smartTrailShift = upperCross(prevCandles , "data.smartTrail") ? "Long" : underCross(prevCandles , "data.smartTrail") ? "Short" : prevCandles[1]?.data?.smartTrailShift
   
 
     
