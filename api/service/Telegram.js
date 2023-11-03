@@ -17,7 +17,7 @@ class Telegram {
         text: text,
       })
       .then((res) => {
-        console.log(res.data);
+        // console.log(res.data);
       })
       .catch((err) => {
         console.error(err);
@@ -103,4 +103,4 @@ const TelegramPandaBite5MinInstance = new Telegram(
 );
 // const TelegramPandaBite5MinInstance = new Telegram(BOT_TOKEN, GROUP_ID);
 
-module.exports = { TelegramInstance, TelegramPandaBite5MinInstance };
+module.exports = { TelegramInstance, TelegramPandaBite5MinInstance , Telegram };
