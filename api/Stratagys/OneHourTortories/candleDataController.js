@@ -11,6 +11,8 @@ const {
   sortCandlesDescending,
   upperCross,
   underCross,
+  turningBullish,
+  turningBearish,
 } = require("./utils");
 const { Telegram } = require("../../service/Telegram");
 
@@ -126,10 +128,15 @@ const initialCandleCalculation = AsyncHandler(async (req, res, next) => {
     prevCandles = sortCandlesDescending(prevCandles)
 
     // Detact Trend Catcher Shift
-    let trendCatcherShift = upperCross(prevCandles , "data.trendCatcher") ? "Long" : underCross(prevCandles , "data.trendCatcher") ? "Short" : prevCandles[1]?.data?.trendCatcherShift;
+    let trendCatcherShift = upperCross(prevCandles , "data.trendCatcher") ? "Long" : underCross(prevCandles , "data.trendCatcher") ? "Short" : null;
 
     // Detact Smart Trail Shift
-    let smartTrailShift = upperCross(prevCandles , "data.smartTrail") ? "Long" : underCross(prevCandles , "data.smartTrail") ? "Short" : prevCandles[1]?.data?.smartTrailShift
+    let smartTrailShift = upperCross(prevCandles , "data.smartTrail") ? "Long" : underCross(prevCandles , "data.smartTrail") ? "Short" : null;
+  
+    let trendCatcherStatus = turningBullish(prevCandles , "data.trendCatcher") ? "Long" : turningBearish(prevCandles , "data.trendCatcher") ? "Short" : prevCandles[1]?.data?.trendCatcherStatus;
+
+    // Detact Smart Trail Shift
+    let smartTrailStatus = turningBullish(prevCandles , "data.smartTrail") ? "Long" : turningBearish(prevCandles , "data.smartTrail") ? "Short" : prevCandles[1]?.data?.smartTrailStatus;
   
 
     
@@ -146,7 +153,9 @@ const initialCandleCalculation = AsyncHandler(async (req, res, next) => {
       "data.trendCatcher": trendCatcher,
       "data.smartTrail": smartTrail,
       "data.trendCatcherShift": trendCatcherShift,
+      "data.trendCatcherStatus": trendCatcherStatus,
       "data.smartTrailShift": smartTrailShift,
+      "data.smartTrailStatus": smartTrailStatus,
     });
 
 
