@@ -13,6 +13,7 @@ const scheduleJobs = require("./api/schedules/scheduleJob");
 const path = require("path");
 const TradingRoute = require("./api/router/tradingDataRoutes");
 const CandleRoute = require("./api/router/CandleDataRoutes");
+const AllDbStream = require("./api/Stratagys/databaseStream");
 
 // Schedule Job
 scheduleJobs();
@@ -64,5 +65,6 @@ app.use(errorMiddleware);
 
 const PORT = process.env.SERVER_PORT || 7000;
 mongoConnection();
+AllDbStream()
 
 module.exports = app;

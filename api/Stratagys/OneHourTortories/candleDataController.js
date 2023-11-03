@@ -8,6 +8,9 @@ const {
   generateMultiCandleTimeRange,
   checkArrayContainsAllItems,
   objectToString,
+  sortCandlesDescending,
+  upperCross,
+  underCross,
 } = require("./utils");
 const { Telegram } = require("../../service/Telegram");
 
@@ -109,6 +112,28 @@ const initialCandleCalculation = AsyncHandler(async (req, res, next) => {
   } else if (isLasoData) {
     // Laso Data
     let { bullish, bullishPlus, bearish, bearishPlus, bullishExit, bearishExit, trendStrength, candleColor, trendCatcher, smartTrail } = candleData;
+    
+    let dateQueryForPrev = generateDateRageFilterMongoose(
+      generateMultiCandleTimeRange(time, +timeframe, 5, 0)
+    );
+    let prevCandles = await CandleData.find({
+      name: SETTINGS.strategyName,
+      symbol,
+      timeframe,
+      time: dateQueryForPrev,
+    });
+    // reordering
+    prevCandles = sortCandlesDescending(prevCandles)
+
+    // Detact Trend Catcher Shift
+    let trendCatcherShift = upperCross(prevCandles , "data.trendCatcher") ? "Long" : underCross(prevCandles , "data.trendCatcher") ? "Short" : prevCandles[1]?.data?.trendCatcher;
+
+    // Detact Smart Trail Shift
+    let smartTrailShift = upperCross(prevCandles , "data.smartTrail") ? "Long" : underCross(prevCandles , "data.smartTrail") ? "Short" : prevCandles[1]?.data?.smartTrail
+  
+
+    
+    
     Object.assign(setData, {
       "data.bullish": bullish,
       "data.bullishPlus": bullishPlus,
@@ -120,7 +145,12 @@ const initialCandleCalculation = AsyncHandler(async (req, res, next) => {
       "data.candleColor": candleColor,
       "data.trendCatcher": trendCatcher,
       "data.smartTrail": smartTrail,
+      "data.trendCatcherShift": trendCatcherShift,
+      "data.smartTrailShift": smartTrailShift,
     });
+
+
+
   } else if (isLlbData) {
     // Manage LLb Data
     let { strongBullish, strongBearish, consensus, histogram, signalLine, macdLine, signalLineCross, upper, lower, average, obOne, osOne, obTwo, osTwo, wtgl, wtrl } = candleData;
@@ -174,20 +204,6 @@ const initialCandleCalculation = AsyncHandler(async (req, res, next) => {
     array: newCandle.type,
   });
 
-  //   =================== Basic Data Organised ===================== //
-
-
-  let dateQueryForPrev = generateDateRageFilterMongoose(
-    generateMultiCandleTimeRange(newCandle.time, +timeframe, 5, 1)
-  );
-  let prev5Candle = await CandleData.find({
-    name: SETTINGS.strategyName,
-    symbol,
-    timeframe,
-    time: dateQueryForPrev,
-  });
-
-
 
 
   if (candleFullfilled) {
@@ -196,24 +212,24 @@ const initialCandleCalculation = AsyncHandler(async (req, res, next) => {
     console.log("Message should send")
   }
 
-  // Check that is it Order candle or not
-  let isOrderableCandle = checkArrayContainsAllItems({
-    data: TYPES_FOR_ORDER_TAKE,
-    array: newCandle.type,
-  });
+  // // Check that is it Order candle or not
+  // let isOrderableCandle = checkArrayContainsAllItems({
+  //   data: TYPES_FOR_ORDER_TAKE,
+  //   array: newCandle.type,
+  // });
 
-  if (isOrderableCandle) {
-    let signal = false;
-    if (newCandle.data?.long) {
-      signal = "Long"
-    } else if (newCandle.data?.short) {
-      signal = "Short"
-    }
-    req.signal = signal;
-    req.currentData = newCandle;
-    req.prevData = prev5Candle;
-    return next()
-  }
+  // if (isOrderableCandle) {
+  //   let signal = false;
+  //   if (newCandle.data?.long) {
+  //     signal = "Long"
+  //   } else if (newCandle.data?.short) {
+  //     signal = "Short"
+  //   }
+  //   req.signal = signal;
+  //   req.currentData = newCandle;
+  //   req.prevData = prev5Candle;
+  //   return next()
+  // }
 
   // Rest of the calculation pass will be here
   res.json({
