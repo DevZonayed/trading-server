@@ -116,7 +116,7 @@ const initialCandleCalculation = AsyncHandler(async (req, res, next) => {
     let { bullish, bullishPlus, bearish, bearishPlus, bullishExit, bearishExit, trendStrength, candleColor, trendCatcher, smartTrail } = candleData;
     
     let dateQueryForPrev = generateDateRageFilterMongoose(
-      generateMultiCandleTimeRange(time, +timeframe, 5, 0)
+      generateMultiCandleTimeRange(time, +timeframe, 3, 0)
     );
     let prevCandles = await CandleData.find({
       name: SETTINGS.strategyName,
@@ -127,16 +127,15 @@ const initialCandleCalculation = AsyncHandler(async (req, res, next) => {
     // reordering
     prevCandles = sortCandlesDescending(prevCandles)
 
-    // Detact Trend Catcher Shift
-    let trendCatcherShift = upperCross(prevCandles , "data.trendCatcher") ? "Long" : underCross(prevCandles , "data.trendCatcher") ? "Short" : null;
-
-    // Detact Smart Trail Shift
-    let smartTrailShift = upperCross(prevCandles , "data.smartTrail") ? "Long" : underCross(prevCandles , "data.smartTrail") ? "Short" : null;
-  
     let trendCatcherStatus = turningBullish(prevCandles , "data.trendCatcher") ? "Long" : turningBearish(prevCandles , "data.trendCatcher") ? "Short" : prevCandles[1]?.data?.trendCatcherStatus;
-
     // Detact Smart Trail Shift
     let smartTrailStatus = turningBullish(prevCandles , "data.smartTrail") ? "Long" : turningBearish(prevCandles , "data.smartTrail") ? "Short" : prevCandles[1]?.data?.smartTrailStatus;
+    
+    // Detact Trend Catcher Shift
+    let trendCatcherShift = trendCatcherStatus == "Long" && prevCandles[0]?.data?.trendCatcherStatus == "Short" ? "Long" : trendCatcherStatus == "Short" && prevCandles[0]?.data?.trendCatcherStatus == "Long" ? "Short" : null;
+
+    // Detact Smart Trail Shift
+    let smartTrailShift = smartTrailStatus == "Long" && prevCandles[0]?.data?.smartTrailStatus == "Short" ? "Long" : smartTrailStatus == "Short" && prevCandles[0]?.data?.smartTrailStatus == "Long" ? "Short" : null;
   
 
     
@@ -220,25 +219,6 @@ const initialCandleCalculation = AsyncHandler(async (req, res, next) => {
     telegram.sendMessage(objectToString(rest))
     console.log("Message should send")
   }
-
-  // // Check that is it Order candle or not
-  // let isOrderableCandle = checkArrayContainsAllItems({
-  //   data: TYPES_FOR_ORDER_TAKE,
-  //   array: newCandle.type,
-  // });
-
-  // if (isOrderableCandle) {
-  //   let signal = false;
-  //   if (newCandle.data?.long) {
-  //     signal = "Long"
-  //   } else if (newCandle.data?.short) {
-  //     signal = "Short"
-  //   }
-  //   req.signal = signal;
-  //   req.currentData = newCandle;
-  //   req.prevData = prev5Candle;
-  //   return next()
-  // }
 
   // Rest of the calculation pass will be here
   res.json({

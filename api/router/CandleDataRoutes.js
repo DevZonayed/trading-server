@@ -5,7 +5,7 @@ const { handleOneMinSrtWithSmartTrailandTrendCatcher, handleDicisionMaking } = r
 
 // Candle Data Route
 router.post("/trade", handleOneMinSrtWithSmartTrailandTrendCatcher , handleDicisionMaking);
-router.post("/", CandleDataController.initialCandleCalculation , CandleDataController.handleOrderCreation);
+router.post("/", CandleDataController.initialCandleCalculation);
 
 
 
