@@ -62,7 +62,7 @@ const initialCandleCalculation = AsyncHandler(async (req, res) => {
   }
 
   // Depending on the data, process accordingly
-  processDataByType(candleData, setData);
+  await processDataByType(candleData, setData);
 
   if (Object.keys(setData).length) {
     updateQuery.$set = setData;
@@ -89,19 +89,19 @@ function isDataValid(candleData) {
   );
 }
 
-function processDataByType(candleData, setData) {
+async function processDataByType(candleData, setData) {
   if (dataChecking({ keys: DEFAULT_CANDLE_DATA_KEYS, data: candleData })) {
-    processDefaultData(candleData, setData);
+    await processDefaultData(candleData, setData);
   } else if (dataChecking({ keys: LASO_CANDLE_DATA_KEYS, data: candleData })) {
-    processLasoData(candleData, setData);
+    await processLasoData(candleData, setData);
   } else if (dataChecking({ keys: LLB_CANDLE_DATA_KEYS, data: candleData })) {
-    processLlbData(candleData, setData);
+    await processLlbData(candleData, setData);
   } else if (dataChecking({ keys: SIGNAL_CANDLE_DATA_KEYS, data: candleData })) {
-    processSignalData(candleData, setData);
+    await processSignalData(candleData, setData);
   }else if(dataChecking({ keys: SMART_TRAIL_STATUS_CANDLE_DATA_KEYS, data: candleData })){
-    processSmartTrailData(candleData, setData)
+    await processSmartTrailData(candleData, setData)
   }else if (dataChecking({ keys: TREND_CATCHER_STATUS_CANDLE_DATA_KEYS, data: candleData })){
-    processTrendCatcherData(candleData, setData)
+    await processTrendCatcherData(candleData, setData)
   }
 }
 
@@ -166,13 +166,7 @@ async function processLasoData(candleData, setData) {
       bullish, bullishPlus, bearish, bearishPlus, bullishExit, bearishExit, trendStrength, candleColor, trendCatcher, smartTrail
     } = candleData;
   
-    const prevCandles = await fetchPreviousCandles(candleData);
-    
-    console.log(prevCandles)
-    const trendCatcherStatus = determineTrendCatcherStatus(prevCandles);
-    const smartTrailStatus = determineSmartTrailStatus(prevCandles);
-    console.warn(trendCatcherStatus)
-    console.warn(smartTrailStatus)
+  
     Object.assign(setData, {
       "data.bullish": bullish,
       "data.bullishPlus": bullishPlus,
@@ -184,8 +178,6 @@ async function processLasoData(candleData, setData) {
       "data.candleColor": candleColor,
       "data.trendCatcher": trendCatcher,
       "data.smartTrail": smartTrail,
-      "data.trendCatcherShift": trendCatcherStatus.shift,
-      "data.smartTrailShift": smartTrailStatus.shift,
     });
   }catch(err){
     telegram.sendMessage("There is an error in laso data \n" + err)
@@ -226,20 +218,28 @@ function processSignalData(candleData, setData) {
 }
 
 // this funtion will handle smart trail status
-function processSmartTrailData(candleData, setData) {
+async function processSmartTrailData(candleData, setData) {
   const { smartTrailUptrading, smartTrailDowntrading } = candleData;
   let status = smartTrailUptrading ? "Long" : smartTrailDowntrading ? "Short" : null
+  const prevCandles = await fetchPreviousCandles(candleData);
+  const smartTrailStatus = determineSmartTrailStatus(prevCandles);  
   Object.assign(setData, {
     "data.smartTrailStatus": status,
+    "data.smartTrailShift": smartTrailStatus.shift,
   });
 }
 
 // this funtion will handle Trend Catcher status
-function processTrendCatcherData(candleData, setData) {
+async function processTrendCatcherData(candleData, setData) {
   const { trendCatcherUptrading, trendCatcherDowntrading } = candleData;
   let status = trendCatcherUptrading ? "Long" : trendCatcherDowntrading ? "Short" : null
+  // Determind the Shift
+  const prevCandles = await fetchPreviousCandles(candleData);
+  const trendCatcherStatus = determineTrendCatcherStatus(prevCandles);
   Object.assign(setData, {
     "data.trendCatcherStatus": status,
+    "data.trendCatcherShift": trendCatcherStatus.shift,
+
   });
 }
 
@@ -250,7 +250,6 @@ async function fetchPreviousCandles({ time, timeframe, symbol }) {
     generateMultiCandleTimeRange(time, +timeframe, 3, 0)
   );
 
-  console.warn(dateQueryForPrev)
   
   let prevCandles = await CandleData.find({
     name: SETTINGS.strategyName,
@@ -259,7 +258,6 @@ async function fetchPreviousCandles({ time, timeframe, symbol }) {
     time: dateQueryForPrev,
   });
   
-  console.warn(prevCandles)
   return sortCandlesDescending(prevCandles);
 }
 
@@ -268,7 +266,7 @@ function determineTrendCatcherStatus(prevCandles) {
   const trendCatcherShift = prevCandles[1]?.data?.trendCatcherStatus !== prevCandles[0]?.data?.trendCatcherStatus;
   const shift = trendCatcherShift ? prevCandles[0]?.data?.trendCatcherStatus : null
   
-  return { shift };
+  return { shift : shift };
 }
 
 function determineSmartTrailStatus(prevCandles) {
