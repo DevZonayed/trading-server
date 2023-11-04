@@ -19,10 +19,10 @@ const telegram = new Telegram(
  */
 async function HandleTradeOrder(candleData, prevCandles) {
     let isPrimaryTrade = isValidTrade(candleData);
-    let trandCatcherShift = determineTrandCatcherShift(candleData)
+    let trendCatcherShift = determineTrandCatcherShift(candleData)
 
     // Check IF tread actionable or not
-    if (!isPrimaryTrade.status && !trandCatcherShift) {
+    if (!isPrimaryTrade.status && !trendCatcherShift) {
         return {
             isExecutable: false,
             reson: SETTINGS.MESSAGES.ORDER.cancle.TrandCatcherSmartTrailNotInFavour
@@ -32,10 +32,10 @@ async function HandleTradeOrder(candleData, prevCandles) {
     // Check Previous Order
     let prevTrade = await fatchPreviousTrade(candleData);
     if (prevTrade) {
-        return handleTradeWithExistingTrade(isPrimaryTrade, trandCatcherShift, prevTrade, candleData, prevCandles)
+        return handleTradeWithExistingTrade(isPrimaryTrade, trendCatcherShift, prevTrade, candleData, prevCandles)
     }
 
-    let direction = isPrimaryTrade.direction ? isPrimaryTrade.direction : trandCatcherShift;
+    let direction = isPrimaryTrade.direction ? isPrimaryTrade.direction : trendCatcherShift;
 
     await handleTrade({ candleData, direction, prevCandles })
 
@@ -189,15 +189,15 @@ function isTradeFalsifiable({ direction, candleData }) {
 /**
  * This mathod is responsible for take dicision if there is a existing trade
  * @param {Boolean | String} isPrimaryTrade 
- * @param {Boolean | String} trandCatcherShift 
+ * @param {Boolean | String} trendCatcherShift 
  * @param {TadeObj{}} prevTrade 
  * @param {CurrenctCandle{}} candleData 
  * @param {PreviousCandle[]} prevCandles 
  * @returns 
  */
-async function handleTradeWithExistingTrade(isPrimaryTrade, trandCatcherShift, prevTrade, candleData, prevCandles) {
+async function handleTradeWithExistingTrade(isPrimaryTrade, trendCatcherShift, prevTrade, candleData, prevCandles) {
     // If needed then close the order
-    let closeResult = await handleCloseTrend({ ...candleData, prevTrade, trandCatcherShift });
+    let closeResult = await handleCloseTrend({ ...candleData, prevTrade, trendCatcherShift });
     if (!closeResult || !isPrimaryTrade) {
         return false;
     }
@@ -219,10 +219,10 @@ async function handleTradeWithExistingTrade(isPrimaryTrade, trandCatcherShift, p
 async function handleCloseTrend(candleData) {
     try {
 
-        let { prevTrade } = candleData;
+        let { prevTrade , trendCatcherShift } = candleData;
         
         // Check order close resons
-        let reson = handleTradeCloseResons(candleData)
+        let reson = handleTradeCloseResons({...candleData.data , prevTrade , trendCatcherShift})
         let profitMargin = calculateTwoRangePercentage(prevTrade.entryPrice, candleData.close)
         if (reson) {
             telegram.sendMessage("Previous Tread will close,\n Your Profit would be: " + profitMargin + "% \n Resion\n" + reson);
@@ -255,7 +255,7 @@ async function handleCloseTrend(candleData) {
  * @returns 
  */
 function handleTradeCloseResons(candleData) {
-    let { prevTrade, smartTrailShift, trendCatcherShift, trendStrength } = candleData
+    let { prevTrade , smartTrailShift, trendCatcherShift, trendStrength } = candleData;
     let prevTradeDirection = prevTrade.direction;
 
     let resons = null
