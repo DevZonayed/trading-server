@@ -19,7 +19,7 @@ const tradeSchema = new mongoose.Schema(
     leverage: Number,
     leverageType : {
         type : String,
-        enum: ["cross", "isolated"],
+        enum: ["Cross", "Isolated"],
     },
     direction: {
       type: String,
