@@ -35,7 +35,7 @@ async function HandleTradeOrder(candleData, prevCandles) {
         return handleTradeWithExistingTrade(isPrimaryTrade, trandCatcherShift, prevTrade, candleData, prevCandles)
     }
 
-    let direction = isPrimaryTrade ? isPrimaryTrade : trandCatcherShift;
+    let direction = isPrimaryTrade.direction ? isPrimaryTrade.direction : trandCatcherShift;
 
     await handleTrade({ candleData, direction, prevCandles })
 
