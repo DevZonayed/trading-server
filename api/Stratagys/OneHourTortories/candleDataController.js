@@ -166,10 +166,10 @@ async function processLasoData(candleData, setData) {
       bullish, bullishPlus, bearish, bearishPlus, bullishExit, bearishExit, trendStrength, candleColor, trendCatcher, smartTrail
     } = candleData;
   
-    const prevCandles = await fetchPreviousCandles(candleData);
+    // const prevCandles = await fetchPreviousCandles(candleData);
   
-    const trendCatcherStatus = determineTrendCatcherStatus(prevCandles);
-    const smartTrailStatus = determineSmartTrailStatus(prevCandles);
+    // const trendCatcherStatus = determineTrendCatcherStatus(prevCandles);
+    // const smartTrailStatus = determineSmartTrailStatus(prevCandles);
   
     Object.assign(setData, {
       "data.bullish": bullish,
@@ -182,8 +182,8 @@ async function processLasoData(candleData, setData) {
       "data.candleColor": candleColor,
       "data.trendCatcher": trendCatcher,
       "data.smartTrail": smartTrail,
-      "data.trendCatcherShift": trendCatcherStatus.shift,
-      "data.smartTrailShift": smartTrailStatus.shift,
+      // "data.trendCatcherShift": trendCatcherStatus.shift,
+      // "data.smartTrailShift": smartTrailStatus.shift,
     });
   }catch(err){
     telegram.sendMessage("There is an error in laso data \n" + err)
