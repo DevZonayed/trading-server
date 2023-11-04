@@ -21,11 +21,8 @@ async function HandleTradeOrder(candleData, prevCandles) {
     let isPrimaryTrade = isValidTrade(candleData);
     let trandCatcherShift = determineTrandCatcherShift(candleData)
 
-    console.log(trandCatcherShift)
-    console.log(isPrimaryTrade)
-
     // Check IF tread actionable or not
-    if (!isPrimaryTrade && !trandCatcherShift) {
+    if (!isPrimaryTrade.status && !trandCatcherShift) {
         return {
             isExecutable: false,
             reson: SETTINGS.MESSAGES.ORDER.cancle.TrandCatcherSmartTrailNotInFavour
