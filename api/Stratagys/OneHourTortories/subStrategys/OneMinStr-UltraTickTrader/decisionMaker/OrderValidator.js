@@ -37,14 +37,7 @@ async function HandleTradeOrder(candleData, prevCandles) {
     }
 
     let direction = isPrimaryTrade ? isPrimaryTrade : trandCatcherShift;
-    let isTradeExecutable = handleTrade({ candleData, direction, prevCandles })
-
-
-
-
-
-
-
+    await handleTrade({ candleData, direction, prevCandles })
 
 
 }
@@ -91,7 +84,10 @@ async function handleTrade({ direction, candleData }) {
 
 }
 
-
+/**
+ * This function will be responsible for Execute Trade
+ * @param {Order Data} payload 
+ */
 async function handleTradeExecute(payload) {
     try {
         telegram.createOrder({
@@ -316,7 +312,7 @@ async function fatchPreviousTrade(candleData) {
         coin: candleData.symbol,
     }
     let previousTrade = await Trade.find(query)
-    if (!previousTrade) {
+    if (previousTrade == null) {
         return false
     }
     return previousTrade
