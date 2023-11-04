@@ -181,9 +181,7 @@ async function processLasoData(candleData, setData) {
     "data.candleColor": candleColor,
     "data.trendCatcher": trendCatcher,
     "data.smartTrail": smartTrail,
-    "data.trendCatcherStatus": trendCatcherStatus.current,
     "data.trendCatcherShift": trendCatcherStatus.shift,
-    "data.smartTrailStatus": smartTrailStatus.current,
     "data.smartTrailShift": smartTrailStatus.shift,
   });
 }
@@ -242,7 +240,7 @@ function processTrendCatcherData(candleData, setData) {
 // Utility Functions:
 
 async function fetchPreviousCandles({ time, timeframe, symbol }) {
-  const dateQueryForPrev = generateDateRangeFilterMongoose(
+  const dateQueryForPrev = generateDateRageFilterMongoose(
     generateMultiCandleTimeRange(time, +timeframe, 3, 0)
   );
 
@@ -257,27 +255,20 @@ async function fetchPreviousCandles({ time, timeframe, symbol }) {
 }
 
 function determineTrendCatcherStatus(prevCandles) {
-  const status = turningBullish(prevCandles, "data.trendCatcher") ? "Long"
-    : turningBearish(prevCandles, "data.trendCatcher") ? "Short"
-    : prevCandles[1]?.data?.trendCatcherStatus;
-
-  const shift = status === "Long" && prevCandles[0]?.data?.trendCatcherStatus === "Short" ? "Long"
-    : status === "Short" && prevCandles[0]?.data?.trendCatcherStatus === "Long" ? "Short"
-    : undefined;
-
-  return { current: status, shift };
+  
+  const trendCatcherShift = prevCandles[1]?.data?.trendCatcherStatus !== prevCandles[0]?.data?.trendCatcherStatus;
+  const shift = trendCatcherShift ? prevCandles[0]?.data?.trendCatcherStatus : null
+  
+  return { shift };
 }
 
 function determineSmartTrailStatus(prevCandles) {
-  const status = increasingValue(prevCandles, "data.smartTrail") ? "Long"
-    : decreasingValue(prevCandles, "data.smartTrail") ? "Short"
-    : prevCandles[1]?.data?.smartTrailStatus;
+  
+  const smartTrailShift = prevCandles[1]?.data?.smartTrailStatus !== prevCandles[0]?.data?.smartTrailStatus;
+  
+  const shift = smartTrailShift ? prevCandles[0]?.data?.smartTrailStatus : null
 
-  const shift = status === "Long" && prevCandles[0]?.data?.smartTrailStatus === "Short" ? "Long"
-    : status === "Short" && prevCandles[0]?.data?.smartTrailStatus === "Long" ? "Short"
-    : undefined;
-
-  return { current: status, shift };
+  return { shift };
 }
 
 
