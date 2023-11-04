@@ -31,10 +31,7 @@ async function HandleTradeOrder(candleData, prevCandles) {
 
     // Check Previous Order
     let prevTrade = await fatchPreviousTrade(candleData);
-    console.log(prevTrade)
-
     if (prevTrade) {
-
         return handleTradeWithExistingTrade(isPrimaryTrade, trandCatcherShift, prevTrade, candleData, prevCandles)
     }
 
@@ -49,7 +46,7 @@ async function HandleTradeOrder(candleData, prevCandles) {
  * This function will be responsible for execute trade
  * @param {direction , candleData} param0 
  */
-async function handleTrade({ direction, candleData }) {
+async function handleTrade({ direction, candleData  , prevCandles}) {
     let isFalseTrade = isTradeFalsifiable({ direction, candleData, prevCandles });
 
     if (isFalseTrade) {
@@ -295,7 +292,7 @@ function handleTradeCloseResons(candleData) {
  */
 function isValidTrade(candleData) {
     let direction = candleData.data.smartTrailShift
-    let status = direction !== null ? true : false;
+    let status = direction !== null;
     return {
         status,
         direction
