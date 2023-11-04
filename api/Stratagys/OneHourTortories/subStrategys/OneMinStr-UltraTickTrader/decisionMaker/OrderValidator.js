@@ -198,13 +198,13 @@ function isTradeFalsifiable({ direction, candleData }) {
 async function handleTradeWithExistingTrade(isPrimaryTrade, trendCatcherShift, prevTrade, candleData, prevCandles) {
     // If needed then close the order
     let closeResult = await handleCloseTrend({ ...candleData, prevTrade, trendCatcherShift });
-    if (!closeResult || !isPrimaryTrade) {
+    if (!closeResult || !isPrimaryTrade.status) {
         return false;
     }
 
     // Give the trade for execute
     let treadPayload = {
-        direction: isPrimaryTrade,
+        direction: isPrimaryTrade.direction,
         candleData,
     }
     handleTrade(treadPayload)
