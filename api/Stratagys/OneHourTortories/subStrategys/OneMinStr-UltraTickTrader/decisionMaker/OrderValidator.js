@@ -31,8 +31,10 @@ async function HandleTradeOrder(candleData, prevCandles) {
 
     // Check Previous Order
     let prevTrade = await fatchPreviousTrade(candleData);
+    console.log(prevTrade)
 
     if (prevTrade) {
+
         return handleTradeWithExistingTrade(isPrimaryTrade, trandCatcherShift, prevTrade, candleData, prevCandles)
     }
 
@@ -220,6 +222,7 @@ async function handleCloseTrend(candleData) {
     try {
 
         let { prevTrade } = candleData;
+        
         // Check order close resons
         let reson = handleTradeCloseResons(candleData)
         let profitMargin = calculateTwoRangePercentage(prevTrade.entryPrice, candleData.close)
@@ -244,7 +247,7 @@ async function handleCloseTrend(candleData) {
             return false
         }
     } catch (err) {
-        telegram.sendMessage("Error Occured while updating the order on bd for close \n Error:" + JSON.stringify(err))
+        telegram.sendMessage("Error Occured while updating the order on db for close \n Error:" + JSON.stringify(err))
     }
 }
 
@@ -311,7 +314,7 @@ async function fatchPreviousTrade(candleData) {
         status: "running",
         coin: candleData.symbol,
     }
-    let previousTrade = await Trade.find(query)
+    let previousTrade = await Trade.findOne(query)
     if (previousTrade == null) {
         return false
     }
