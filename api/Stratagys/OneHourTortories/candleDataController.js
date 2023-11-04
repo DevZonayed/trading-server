@@ -221,8 +221,11 @@ function processSignalData(candleData, setData) {
 async function processSmartTrailData(candleData, setData) {
   const { smartTrailUptrading, smartTrailDowntrading } = candleData;
   let status = smartTrailUptrading ? "Long" : smartTrailDowntrading ? "Short" : null
+  
   const prevCandles = await fetchPreviousCandles(candleData);
-  const smartTrailStatus = determineSmartTrailStatus(prevCandles);  
+  const smartTrailStatus = determineSmartTrailStatus(prevCandles , status);
+
+
   Object.assign(setData, {
     "data.smartTrailStatus": status,
     "data.smartTrailShift": smartTrailStatus.shift,
@@ -235,7 +238,7 @@ async function processTrendCatcherData(candleData, setData) {
   let status = trendCatcherUptrading ? "Long" : trendCatcherDowntrading ? "Short" : null
   // Determind the Shift
   const prevCandles = await fetchPreviousCandles(candleData);
-  const trendCatcherStatus = determineTrendCatcherStatus(prevCandles);
+  const trendCatcherStatus = determineTrendCatcherStatus(prevCandles , status);
   Object.assign(setData, {
     "data.trendCatcherStatus": status,
     "data.trendCatcherShift": trendCatcherStatus.shift,
@@ -261,19 +264,19 @@ async function fetchPreviousCandles({ time, timeframe, symbol }) {
   return sortCandlesDescending(prevCandles);
 }
 
-function determineTrendCatcherStatus(prevCandles) {
+function determineTrendCatcherStatus(prevCandles , status) {
   
-  const trendCatcherShift = prevCandles[1]?.data?.trendCatcherStatus !== prevCandles[0]?.data?.trendCatcherStatus;
-  const shift = trendCatcherShift ? prevCandles[0]?.data?.trendCatcherStatus : null
+  const trendCatcherShift = prevCandles[1]?.data?.trendCatcherStatus !== status;
+  const shift = trendCatcherShift ? status : null
   
   return { shift : shift };
 }
 
-function determineSmartTrailStatus(prevCandles) {
+function determineSmartTrailStatus(prevCandles , status) {
   
-  const smartTrailShift = prevCandles[1]?.data?.smartTrailStatus !== prevCandles[0]?.data?.smartTrailStatus;
+  const smartTrailShift = prevCandles[1]?.data?.smartTrailStatus !== status
   
-  const shift = smartTrailShift ? prevCandles[0]?.data?.smartTrailStatus : null
+  const shift = smartTrailShift ? status : null
 
   return { shift };
 }
