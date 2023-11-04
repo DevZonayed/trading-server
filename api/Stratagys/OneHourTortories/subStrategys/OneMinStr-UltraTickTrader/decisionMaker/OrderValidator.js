@@ -21,6 +21,9 @@ async function HandleTradeOrder(candleData, prevCandles) {
     let isPrimaryTrade = isValidTrade(candleData);
     let trandCatcherShift = determineTrandCatcherShift(candleData)
 
+    console.log(trandCatcherShift)
+    console.log(isPrimaryTrade)
+
     // Check IF tread actionable or not
     if (!isPrimaryTrade && !trandCatcherShift) {
         return {
@@ -36,6 +39,7 @@ async function HandleTradeOrder(candleData, prevCandles) {
     }
 
     let direction = isPrimaryTrade ? isPrimaryTrade : trandCatcherShift;
+
     await handleTrade({ candleData, direction, prevCandles })
 
 
