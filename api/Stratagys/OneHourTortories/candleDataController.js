@@ -38,193 +38,221 @@ const SETTINGS = {
 const telegram = new Telegram(SETTINGS.telegramCradentials.botToken, SETTINGS.telegramCradentials.channelId)
 
 
+
+
+
+
 /**
  * @Route = "root/api/v1/candle-data"
  * @method =POST
  * @access Public
  * @description This Controller will work as controller middleware that is handle basic candle data
  */
-const initialCandleCalculation = AsyncHandler(async (req, res, next) => {
-  let candleData = parseStringToObject(req.body);
-
-  //   Check the required data is present or not
-  let isDefaultData = dataChecking({
-    keys: DEFAULT_CANDLE_DATA_KEYS,
-    data: candleData,
-  });
-
-  let isLasoData = dataChecking({
-    keys: LASO_CANDLE_DATA_KEYS,
-    data: candleData,
-  });
-
-  let isLlbData = dataChecking({
-    keys: LLB_CANDLE_DATA_KEYS,
-    data: candleData,
-  });
-
-  let isSignalData = dataChecking({
-    keys: SIGNAL_CANDLE_DATA_KEYS,
-    data: candleData,
-  });
-
-  // Required Data
-  let { type, time, symbol, timeframe } = candleData
-  // Updating data to database
-  let updateQuery = { $addToSet: { type } };
+const initialCandleCalculation = AsyncHandler(async (req, res) => {
+  const candleData = parseStringToObject(req.body);
+  const updateQuery = { $addToSet: { type: candleData.type } };
   const setData = {};
-  if (isDefaultData) {
 
-    let { open, close, high, low, volume, candleStatus, bodySize, upperTail, lowerTail, ema, change } = candleData;
-
-    // Entry Price Calculations
-    let longEntryPrice = calculateTargetPrice(
-      +close,
-      SETTINGS.entryPricePercent,
-      true
-    );
-    let shortEntryPrice = calculateTargetPrice(
-      +close,
-      SETTINGS.entryPricePercent,
-      false
-    );
-    let profitZones = generateTakePrifitPrices(
-      longEntryPrice,
-      shortEntryPrice,
-      SETTINGS.profitTakePercentage
-    );
-
-    Object.assign(setData, {
-      open: +open,
-      close: +close,
-      high: +high,
-      low: +low,
-      volume: +volume,
-      candleStatus: +candleStatus,
-      bodySize: +bodySize,
-      upperTail: +upperTail,
-      lowerTail: +lowerTail,
-      ema: +ema,
-      change: +change,
-      longEntryPrice: +longEntryPrice,
-      shortEntryPrice: +shortEntryPrice,
-      longProfitTakeZones: profitZones.longProfitTakeZones,
-      shortProfitTakeZones: profitZones.shortProfitTakeZones
-    });
-  } else if (isLasoData) {
-    // Laso Data
-    let { bullish, bullishPlus, bearish, bearishPlus, bullishExit, bearishExit, trendStrength, candleColor, trendCatcher, smartTrail } = candleData;
-    
-    let dateQueryForPrev = generateDateRageFilterMongoose(
-      generateMultiCandleTimeRange(time, +timeframe, 3, 0)
-    );
-    let prevCandles = await CandleData.find({
-      name: SETTINGS.strategyName,
-      symbol,
-      timeframe,
-      time: dateQueryForPrev,
-    });
-    // reordering
-    prevCandles = sortCandlesDescending(prevCandles)
-
-    let trendCatcherStatus = turningBullish(prevCandles , "data.trendCatcher") ? "Long" : turningBearish(prevCandles , "data.trendCatcher") ? "Short" : prevCandles[1]?.data?.trendCatcherStatus;
-    // Detact Smart Trail Shift
-    let smartTrailStatus = turningBullish(prevCandles , "data.smartTrail") ? "Long" : turningBearish(prevCandles , "data.smartTrail") ? "Short" : prevCandles[1]?.data?.smartTrailStatus;
-    
-    // Detact Trend Catcher Shift
-    let trendCatcherShift = trendCatcherStatus == "Long" && prevCandles[0]?.data?.trendCatcherStatus == "Short" ? "Long" : trendCatcherStatus == "Short" && prevCandles[0]?.data?.trendCatcherStatus == "Long" ? "Short" : null;
-
-    // Detact Smart Trail Shift
-    let smartTrailShift = smartTrailStatus == "Long" && prevCandles[0]?.data?.smartTrailStatus == "Short" ? "Long" : smartTrailStatus == "Short" && prevCandles[0]?.data?.smartTrailStatus == "Long" ? "Short" : null;
-  
-
-    
-    
-    Object.assign(setData, {
-      "data.bullish": bullish,
-      "data.bullishPlus": bullishPlus,
-      "data.bearish": bearish,
-      "data.bearishPlus": bearishPlus,
-      "data.bullishExit": bullishExit,
-      "data.bearishExit": bearishExit,
-      "data.trendStrength": trendStrength,
-      "data.candleColor": candleColor,
-      "data.trendCatcher": trendCatcher,
-      "data.smartTrail": smartTrail,
-      "data.trendCatcherShift": trendCatcherShift,
-      "data.trendCatcherStatus": trendCatcherStatus,
-      "data.smartTrailShift": smartTrailShift,
-      "data.smartTrailStatus": smartTrailStatus,
-    });
-
-
-
-  } else if (isLlbData) {
-    // Manage LLb Data
-    let { strongBullish, strongBearish, consensus, histogram, signalLine, macdLine, signalLineCross, upper, lower, average, obOne, osOne, obTwo, osTwo, wtgl, wtrl } = candleData;
-    Object.assign(setData, {
-      "data.strongBullish": strongBullish,
-      "data.strongBearish": strongBearish,
-      "data.consensus": consensus,
-      "data.histogram": histogram,
-      "data.signalLine": signalLine,
-      "data.macdLine": macdLine,
-      "data.signalLineCross": signalLineCross,
-      "data.upper": upper,
-      "data.lower": lower,
-      "data.average": average,
-      "data.obOne": obOne,
-      "data.osOne": osOne,
-      "data.obTwo": obTwo,
-      "data.osTwo": osTwo,
-      "data.wtgl": wtgl,
-      "data.wtrl": wtrl
-    });
-  } else if (isSignalData) {
-    let { long, short } = candleData;
-    Object.assign(setData, {
-      "data.long": long,
-      "data.short": short,
-    });
-  } else {
-    console.log("Unknown Data Pushed")
-    console.log(candleData)
-    return res.json({
-      message: "Unknown Data"
-    })
+  // Check the required data presence
+  if (!isDataValid(candleData)) {
+    console.log("Unknown Data Pushed", candleData);
+    return res.json({ message: "Unknown Data" });
   }
+
+  // Depending on the data, process accordingly
+  processDataByType(candleData, setData);
+
   if (Object.keys(setData).length) {
     updateQuery.$set = setData;
   }
-  // Date Query Filter
-  // let dateQuery = generateDateRageFilterMongoose(generateTimeRange(time, 0.5));
-  let newCandle = await CandleData.findOneAndUpdate(
-    { symbol, time: new Date(time), timeframe, name: SETTINGS.strategyName },
-    updateQuery,
-    {
-      new: true,
-      upsert: true,
-    }
+
+  const newCandle = await updateCandleData(candleData, updateQuery);
+
+  // Send Telegram message if the candle is fulfilled
+  if (isNewCandleFulfilled(newCandle)) {
+    sendTelegramMessage(newCandle);
+  }
+
+  res.json({ message: "Success" });
+});
+
+function isDataValid(candleData) {
+  return (
+    dataChecking({ keys: DEFAULT_CANDLE_DATA_KEYS, data: candleData }) ||
+    dataChecking({ keys: LASO_CANDLE_DATA_KEYS, data: candleData }) ||
+    dataChecking({ keys: LLB_CANDLE_DATA_KEYS, data: candleData }) ||
+    dataChecking({ keys: SIGNAL_CANDLE_DATA_KEYS, data: candleData })
   );
-  // Telegram info
-  let candleFullfilled = checkArrayContainsAllItems({
+}
+
+function processDataByType(candleData, setData) {
+  if (dataChecking({ keys: DEFAULT_CANDLE_DATA_KEYS, data: candleData })) {
+    processDefaultData(candleData, setData);
+  } else if (dataChecking({ keys: LASO_CANDLE_DATA_KEYS, data: candleData })) {
+    processLasoData(candleData, setData);
+  } else if (dataChecking({ keys: LLB_CANDLE_DATA_KEYS, data: candleData })) {
+    processLlbData(candleData, setData);
+  } else if (dataChecking({ keys: SIGNAL_CANDLE_DATA_KEYS, data: candleData })) {
+    processSignalData(candleData, setData);
+  }
+}
+
+async function updateCandleData(candleData, updateQuery) {
+  return CandleData.findOneAndUpdate(
+    {
+      symbol: candleData.symbol,
+      time: new Date(candleData.time),
+      timeframe: candleData.timeframe,
+      name: SETTINGS.strategyName
+    },
+    updateQuery,
+    { new: true, upsert: true }
+  );
+}
+
+function isNewCandleFulfilled(newCandle) {
+  return checkArrayContainsAllItems({
     data: TYPES_FOR_FULL_CANDLE,
     array: newCandle.type,
   });
+}
+
+function sendTelegramMessage(newCandle) {
+  const { _id, __v, ...rest } = newCandle.toObject();
+  telegram.sendMessage(objectToString(rest));
+  console.log("Message should send");
+}
 
 
+async function processDefaultData(candleData, setData) {
+  const {
+    open, close, high, low, volume, candleStatus, bodySize, upperTail, lowerTail, ema, change,
+  } = candleData;
 
-  if (candleFullfilled) {
-    const {_id ,__v, ...rest} = newCandle.toObject()
-    telegram.sendMessage(objectToString(rest))
-    console.log("Message should send")
-  }
+  const longEntryPrice = calculateTargetPrice(+close, SETTINGS.entryPricePercent, true);
+  const shortEntryPrice = calculateTargetPrice(+close, SETTINGS.entryPricePercent, false);
+  const profitZones = generateTakeProfitPrices(longEntryPrice, shortEntryPrice, SETTINGS.profitTakePercentage);
 
-  // Rest of the calculation pass will be here
-  res.json({
-    message: "Success",
+  Object.assign(setData, {
+    open: +open,
+    close: +close,
+    high: +high,
+    low: +low,
+    volume: +volume,
+    candleStatus: +candleStatus,
+    bodySize: +bodySize,
+    upperTail: +upperTail,
+    lowerTail: +lowerTail,
+    ema: +ema,
+    change: +change,
+    longEntryPrice: +longEntryPrice,
+    shortEntryPrice: +shortEntryPrice,
+    longProfitTakeZones: profitZones.longProfitTakeZones,
+    shortProfitTakeZones: profitZones.shortProfitTakeZones
   });
-});
+}
+
+async function processLasoData(candleData, setData) {
+  const {
+    bullish, bullishPlus, bearish, bearishPlus, bullishExit, bearishExit, trendStrength, candleColor, trendCatcher, smartTrail
+  } = candleData;
+
+  const prevCandles = await fetchPreviousCandles(candleData);
+
+  const trendCatcherStatus = determineTrendCatcherStatus(prevCandles);
+  const smartTrailStatus = determineSmartTrailStatus(prevCandles);
+
+  Object.assign(setData, {
+    "data.bullish": bullish,
+    "data.bullishPlus": bullishPlus,
+    "data.bearish": bearish,
+    "data.bearishPlus": bearishPlus,
+    "data.bullishExit": bullishExit,
+    "data.bearishExit": bearishExit,
+    "data.trendStrength": trendStrength,
+    "data.candleColor": candleColor,
+    "data.trendCatcher": trendCatcher,
+    "data.smartTrail": smartTrail,
+    "data.trendCatcherStatus": trendCatcherStatus.current,
+    "data.trendCatcherShift": trendCatcherStatus.shift,
+    "data.smartTrailStatus": smartTrailStatus.current,
+    "data.smartTrailShift": smartTrailStatus.shift,
+  });
+}
+
+async function processLlbData(candleData, setData) {
+  const {
+    strongBullish, strongBearish, consensus, histogram, signalLine, macdLine, signalLineCross, upper, lower, average, obOne, osOne, obTwo, osTwo, wtgl, wtrl
+  } = candleData;
+
+  Object.assign(setData, {
+    "data.strongBullish": strongBullish,
+    "data.strongBearish": strongBearish,
+    "data.consensus": consensus,
+    "data.histogram": histogram,
+    "data.signalLine": signalLine,
+    "data.macdLine": macdLine,
+    "data.signalLineCross": signalLineCross,
+    "data.upper": upper,
+    "data.lower": lower,
+    "data.average": average,
+    "data.obOne": obOne,
+    "data.osOne": osOne,
+    "data.obTwo": obTwo,
+    "data.osTwo": osTwo,
+    "data.wtgl": wtgl,
+    "data.wtrl": wtrl,
+  });
+}
+
+function processSignalData(candleData, setData) {
+  const { long, short } = candleData;
+  Object.assign(setData, {
+    "data.long": long,
+    "data.short": short,
+  });
+}
+
+// Utility Functions:
+
+async function fetchPreviousCandles({ time, timeframe, symbol }) {
+  const dateQueryForPrev = generateDateRangeFilterMongoose(
+    generateMultiCandleTimeRange(time, +timeframe, 3, 0)
+  );
+
+  let prevCandles = await CandleData.find({
+    name: SETTINGS.strategyName,
+    symbol,
+    timeframe,
+    time: dateQueryForPrev,
+  });
+
+  return sortCandlesDescending(prevCandles);
+}
+
+function determineTrendCatcherStatus(prevCandles) {
+  const status = turningBullish(prevCandles, "data.trendCatcher") ? "Long"
+    : turningBearish(prevCandles, "data.trendCatcher") ? "Short"
+    : prevCandles[1]?.data?.trendCatcherStatus;
+
+  const shift = status === "Long" && prevCandles[0]?.data?.trendCatcherStatus === "Short" ? "Long"
+    : status === "Short" && prevCandles[0]?.data?.trendCatcherStatus === "Long" ? "Short"
+    : undefined;
+
+  return { current: status, shift };
+}
+
+function determineSmartTrailStatus(prevCandles) {
+  const status = increasingValue(prevCandles, "data.smartTrail") ? "Long"
+    : decreasingValue(prevCandles, "data.smartTrail") ? "Short"
+    : prevCandles[1]?.data?.smartTrailStatus;
+
+  const shift = status === "Long" && prevCandles[0]?.data?.smartTrailStatus === "Short" ? "Long"
+    : status === "Short" && prevCandles[0]?.data?.smartTrailStatus === "Long" ? "Short"
+    : undefined;
+
+  return { current: status, shift };
+}
 
 
 /**
