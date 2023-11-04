@@ -320,7 +320,7 @@ module.exports = CandleDataController;
 
 
 // Generate Profit Zones
-function generateTakePrifitPrices(upperEntry, lowerEntry, percentageArr) {
+function generateTakeProfitPrices(upperEntry, lowerEntry, percentageArr) {
   let longProfitTakeZones = percentageArr.map((percentage) =>
     calculateTargetPrice(upperEntry, percentage, true)
   );
