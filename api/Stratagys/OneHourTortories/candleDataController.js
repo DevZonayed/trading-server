@@ -21,8 +21,10 @@ const DEFAULT_CANDLE_DATA_KEYS = [...REQUIRED_DATA_KEYS, "open", "close", "high"
 const LLB_CANDLE_DATA_KEYS = [...REQUIRED_DATA_KEYS, "strongBullish", "strongBearish", "consensus", "histogram", "signalLine", "macdLine", "signalLineCross", "upper", "lower", "average", "obOne", "osOne", "obTwo", "osTwo", "wtgl", "wtrl"];
 const LASO_CANDLE_DATA_KEYS = [...REQUIRED_DATA_KEYS, "bullish", "bullishPlus", "bearish", "bearishPlus", "bullishExit", "bearishExit", "trendStrength", "candleColor", "trendCatcher", "smartTrail"];
 const SIGNAL_CANDLE_DATA_KEYS = [...REQUIRED_DATA_KEYS, "long", "short"];
+const SMART_TRAIL_STATUS_CANDLE_DATA_KEYS = [...REQUIRED_DATA_KEYS, "smartTrailUptrading", "smartTrailDowntrading"];
+const TREND_CATCHER_STATUS_CANDLE_DATA_KEYS = [...REQUIRED_DATA_KEYS, "trendCatcherUptrading", "trendCatcherDowntrading"];
 const TYPES_FOR_ORDER_TAKE = ["default", "llb", "laso", "signal"];
-const TYPES_FOR_FULL_CANDLE = ["default", "llb", "laso"];
+const TYPES_FOR_FULL_CANDLE = ["default", "llb", "laso" , "tcst", "stst"];
 
 const SETTINGS = {
   strategyName: "Tortoris_1h",
@@ -81,7 +83,9 @@ function isDataValid(candleData) {
     dataChecking({ keys: DEFAULT_CANDLE_DATA_KEYS, data: candleData }) ||
     dataChecking({ keys: LASO_CANDLE_DATA_KEYS, data: candleData }) ||
     dataChecking({ keys: LLB_CANDLE_DATA_KEYS, data: candleData }) ||
-    dataChecking({ keys: SIGNAL_CANDLE_DATA_KEYS, data: candleData })
+    dataChecking({ keys: SIGNAL_CANDLE_DATA_KEYS, data: candleData }) ||
+    dataChecking({ keys: SMART_TRAIL_STATUS_CANDLE_DATA_KEYS, data: candleData }) ||
+    dataChecking({ keys: TREND_CATCHER_STATUS_CANDLE_DATA_KEYS, data: candleData })
   );
 }
 
@@ -94,6 +98,10 @@ function processDataByType(candleData, setData) {
     processLlbData(candleData, setData);
   } else if (dataChecking({ keys: SIGNAL_CANDLE_DATA_KEYS, data: candleData })) {
     processSignalData(candleData, setData);
+  }else if(dataChecking({ keys: SMART_TRAIL_STATUS_CANDLE_DATA_KEYS, data: candleData })){
+    processSmartTrailData(candleData, setData)
+  }else if (dataChecking({ keys: TREND_CATCHER_STATUS_CANDLE_DATA_KEYS, data: candleData })){
+    processTrendCatcherData(candleData, setData)
   }
 }
 
@@ -210,6 +218,24 @@ function processSignalData(candleData, setData) {
   Object.assign(setData, {
     "data.long": long,
     "data.short": short,
+  });
+}
+
+// this funtion will handle smart trail status
+function processSmartTrailData(candleData, setData) {
+  const { smartTrailUptrading, smartTrailDowntrading } = candleData;
+  let status = smartTrailUptrading ? "Long" : smartTrailDowntrading ? "Short" : null
+  Object.assign(setData, {
+    "data.smartTrailStatus": status,
+  });
+}
+
+// this funtion will handle Trend Catcher status
+function processTrendCatcherData(candleData, setData) {
+  const { trendCatcherUptrading, trendCatcherDowntrading } = candleData;
+  let status = trendCatcherUptrading ? "Long" : trendCatcherDowntrading ? "Short" : null
+  Object.assign(setData, {
+    "data.trendCatcherStatus": status,
   });
 }
 
