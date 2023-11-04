@@ -1,7 +1,8 @@
 const { Telegram } = require("../../../../../service/Telegram");
 const { generateMultiCandleTimeRange, generateDateRageFilterMongoose, sortCandlesDescending } = require("../../../utils");
 const SETTINGS = require("../Settings");
-const CandleData = require("../../../../../model/CandleData")
+const CandleData = require("../../../../../model/CandleData");
+const { HandleTradeOrder } = require("./OrderValidator");
 
 
 
@@ -19,6 +20,9 @@ async function HandleUltraTickTrader(candleData) {
         let prevCandles = await previousCandles(currentCandleTime, 2);
         prevCandles.push(candleData)
         prevCandles = sortCandlesDescending(prevCandles);
+        // This function will handle order should take or not
+        let isValidOrder = HandleTradeOrder(candleData , prevCandles)
+
 
 
     } catch (err) {

@@ -274,6 +274,22 @@ function crossunder(candles, keyAPath, keyBPath) {
 }
 
 
+/**
+ * This function will help to calculate the percentage of
+ * two number range
+ * @param {Number} before 
+ * @param {Number} after 
+ * @returns 
+ */
+function calculateTwoRangePercentage( before, after) {
+  before = +before;
+  after = +after;
+
+  // Calculate the candle body size percentage compared to the close
+  const bodySizePercentage = (((after - before) / after) * 100).toFixed(2);
+  return Math.abs(+bodySizePercentage);
+}
+
 
 
 
@@ -287,6 +303,7 @@ function crossunder(candles, keyAPath, keyBPath) {
 
 // Exporting all the utils
 module.exports = {
+  calculateTwoRangePercentage,
   dataChecking,
   generateTimeRange,
   generateMultiCandleTimeRange,
