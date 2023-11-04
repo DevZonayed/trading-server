@@ -145,3 +145,114 @@ fill(plot_bear_ext, plot_bear, math.min(bull, 0), bear, color.new(chart.bg_color
 hline(0, linestyle = hline.style_solid)
 
 //-----------------------------------------------------------------------------}
+
+
+
+
+
+
+
+
+
+
+
+
+
+name = Tortoris_1h
+symbol = BTCUSDT
+time =
+timeframe = 1
+bodySize = 0.0218381391606642
+candleStatus = -1
+change = -0.021550857149425
+close = 34793.9
+createdAt =
+ema = 34795.68387298841
+high = 34801.5
+longEntryPrice = 34800.85878
+longProfitTakeZones =
+  0 = 34835.65963878
+  1 = 34905.26135634
+  2 = 35148.867367800005
+low = 34790.9
+lowerTail = 0.0086222010179945
+open = 34801.5
+shortEntryPrice = 34786.94122
+shortProfitTakeZones =
+  0 = 34752.15427878
+  1 = 34682.58039634
+  2 = 34439.0718078
+type =
+  0 = default
+  1 = llb
+  2 = laso
+updatedAt =
+upperTail = 0
+volume = 34.098
+data =
+  average = 34810.675
+  consensus = -22.45181028406417
+  histogram = -2.060567011329457
+  lower = null
+  macdLine = -4.903690749262751
+  obOne = 60
+  obTwo = 48
+  osOne = -60
+  osTwo = -48
+  signalLine = -2.8431237379332934
+  signalLineCross = null
+  strongBearish = 0
+  strongBullish = 0
+  upper = 34847.549999999996
+  wtgl = -21.972344060973597
+  wtrl = -17.218846664791307
+  bearish = 0
+  bearishExit = null
+  bearishPlus = 0
+  bullish = 0
+  bullishExit = null
+  bullishPlus = 0
+  candleColor = -1
+  smartTrail = 34862.70747699567
+  smartTrailShift =
+  smartTrailStatus = Long
+  trendCatcher = 34801.35854
+  trendCatcherShift =
+  trendCatcherStatus = Short
+  trendStrength = 6.660279753306131
+
+  ==========================================================
+
+  name = Tortoris_1h
+symbol = BTCUSDT
+time =
+timeframe = 1
+createdAt =
+data =
+  average = 34779.723470844605
+  consensus = 17.49495378719257
+  histogram = 7.791840127374337
+  lower = 34720.25
+  macdLine = 9.160068502242211
+  obOne = 60
+  obTwo = 48
+  osOne = -60
+  osTwo = -48
+  signalLine = 1.3682283748678734
+  signalLineCross = null
+  strongBearish = 0
+  strongBullish = 0
+  upper = null
+  wtgl = 40.84700526671452
+  wtrl = 39.260848157489164
+  smartTrailStatus = Long
+  trendCatcherStatus = Long
+longProfitTakeZones =
+shortProfitTakeZones =
+type =
+  0 = llb
+  1 = laso
+  2 = default
+  3 = stst
+  4 = tcst
+updatedAt =
