@@ -1,7 +1,7 @@
 const SETTINGS = {
     strategy: {
         name: "Tortoris_1h",
-        symbol: "BTCUSDT",
+        symbol: "SOLUSDT",
         timeframe: 1,
         orderTakeKeys: ["default", "llb", "laso" , "tcst", "stst"]
     },
