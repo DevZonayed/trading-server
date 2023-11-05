@@ -16,7 +16,6 @@ const CANDLE_DATA_PIPELINE = [
   {
     $match: {
       $and: [
-        { 'fullDocument.symbol': SETTINGS.strategy.symbol },
         { 'fullDocument.timeframe': SETTINGS.strategy.timeframe },
         { 'fullDocument.name': SETTINGS.strategy.name },
       ],
@@ -34,10 +33,10 @@ const CANDLE_DATA_OPTIONS = { fullDocument: 'updateLookup' };
 
 // Checks if the provided candleData is newer than the latestCandle
 function isNewCandle(latestCandle, candleData) {
-    if (!latestCandle.time) {
+    if (!latestCandle[candleData.symbol]) {
       return true;
     }
-    return new Date(candleData.time) > new Date(latestCandle.time);
+    return new Date(candleData.time) > new Date(latestCandle[candleData.symbol]);
   }
   
   // Validates if the candleData meets the criteria for making a decision
@@ -54,7 +53,7 @@ function isNewCandle(latestCandle, candleData) {
     const { fullDocument: candleData } = change;
     
     if (candleData && isNewCandle(latestCandle, candleData) && isValidCandleForUltraTickTrader(candleData)) {
-      latestCandle.time = candleData.time; // Update the time of the latest candle
+      latestCandle[candleData.symbol] = candleData.time; // Update the time of the latest candle
       HandleUltraTickTrader(candleData);
     }
 

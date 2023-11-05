@@ -16,8 +16,7 @@ const telegram = new Telegram(
 async function HandleUltraTickTrader(candleData) {
     try {
         // Fatch Previous Candles
-        let currentCandleTime = candleData.time;
-        let prevCandles = await previousCandles(currentCandleTime, 2);
+        let prevCandles = await previousCandles(candleData, 2);
         prevCandles.push(candleData)
         prevCandles = sortCandlesDescending(prevCandles);
         // This function will handle order should take or not
@@ -37,17 +36,17 @@ async function HandleUltraTickTrader(candleData) {
  * @param {number} count 
  * @returns {{candleData}[]}
  */
-async function previousCandles(date, count) {
+async function previousCandles({time , timeframe , symbol , name}, count) {
     try {
         // Generate timerange for previous candle
-        let candleTimeRange = generateMultiCandleTimeRange(date, SETTINGS.strategy.timeframe, count, 1)
+        let candleTimeRange = generateMultiCandleTimeRange(time, +timeframe, count, 1)
         // Generate Mongoose Date Query with this
         let candleTimeQuery = generateDateRageFilterMongoose(candleTimeRange)
         // Fatch Previous Candles
         let prevCandles = await CandleData.find({
-            name: SETTINGS.strategy.name,
-            symbol: SETTINGS.strategy.symbol,
-            timeframe: SETTINGS.strategy.timeframe,
+            name,
+            symbol,
+            timeframe,
             time: candleTimeQuery,
         });
         return prevCandles

@@ -21,6 +21,11 @@ async function HandleTradeOrder(candleData, prevCandles) {
     let isPrimaryTrade = isValidTrade(candleData);
     let trendCatcherShift = determineTrandCatcherShift(candleData)
 
+    // Check Previous Order
+    let prevTrade = await fatchPreviousTrade(candleData);
+    if (prevTrade) {
+        return handleTradeWithExistingTrade(isPrimaryTrade, trendCatcherShift, prevTrade, candleData, prevCandles)
+    }
     // Check IF tread actionable or not
     if (!isPrimaryTrade.status && !trendCatcherShift) {
         return {
@@ -29,11 +34,6 @@ async function HandleTradeOrder(candleData, prevCandles) {
         }
     }
 
-    // Check Previous Order
-    let prevTrade = await fatchPreviousTrade(candleData);
-    if (prevTrade) {
-        return handleTradeWithExistingTrade(isPrimaryTrade, trendCatcherShift, prevTrade, candleData, prevCandles)
-    }
 
     let direction = isPrimaryTrade.direction ? isPrimaryTrade.direction : trendCatcherShift;
 
@@ -198,7 +198,8 @@ function isTradeFalsifiable({ direction, candleData }) {
 async function handleTradeWithExistingTrade(isPrimaryTrade, trendCatcherShift, prevTrade, candleData, prevCandles) {
     // If needed then close the order
     let closeResult = await handleCloseTrend({ ...candleData, prevTrade, trendCatcherShift });
-    if (!closeResult || !isPrimaryTrade.status) {
+    
+    if (!closeResult || !isPrimaryTrade.status || !trendCatcherShift) {
         return false;
     }
 
