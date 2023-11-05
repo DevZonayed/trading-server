@@ -287,7 +287,7 @@ function calculateTwoRangePercentage( before, after) {
 
   // Calculate the candle body size percentage compared to the close
   const bodySizePercentage = (((after - before) / after) * 100).toFixed(2);
-  return Math.abs(+bodySizePercentage);
+  return bodySizePercentage;
 }
 
 
