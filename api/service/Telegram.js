@@ -11,7 +11,7 @@ class Telegram {
   }
 
   sendMessage(text) {
-    axios
+    return axios
       .post(`https://api.telegram.org/bot${this.botToken}/sendMessage`, {
         chat_id: this.groupId,
         text: text,
