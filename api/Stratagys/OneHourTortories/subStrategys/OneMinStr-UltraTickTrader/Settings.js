@@ -2,7 +2,7 @@ const SETTINGS = {
     strategy: {
         name: "Tortoris_1h",
         symbol: "SOLUSDT",
-        timeframe: 1,
+        // timeframe: 1,
         orderTakeKeys: ["default", "llb", "laso" , "tcst", "stst"]
     },
     order: {
