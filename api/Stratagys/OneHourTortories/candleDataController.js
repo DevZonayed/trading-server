@@ -33,7 +33,7 @@ const SETTINGS = {
     channelId: "-1002086222625"
   },
   entryPricePercent: 0.02,
-  profitTakePercentage: [0.90, 1, 1.90 , 2 , 3]
+  profitTakePercentage: [0.30 , 0.90, 1, 1.90 , 2 , 3]
 }
 
 
