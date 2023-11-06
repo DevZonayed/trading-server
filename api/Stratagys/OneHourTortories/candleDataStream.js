@@ -16,7 +16,6 @@ const CANDLE_DATA_PIPELINE = [
   {
     $match: {
       $and: [
-        { 'fullDocument.timeframe': SETTINGS.strategy.timeframe },
         { 'fullDocument.name': SETTINGS.strategy.name },
       ],
       $or: [
