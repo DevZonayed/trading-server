@@ -2,6 +2,7 @@ const Trade = require("../../../../../model/Trade");
 const { Telegram } = require("../../../../../service/Telegram");
 const { calculateTwoRangePercentage } = require("../../../utils");
 const SETTINGS = require("../Settings");
+const handleLeverage = require("./HandleLeverage");
 
 const telegram = new Telegram(
     SETTINGS.telegramCradentials.botToken,
@@ -15,82 +16,93 @@ const telegram = new Telegram(
  * @returns {{isExecutable , reason , direction}}
  */
 async function HandleTradeOrder(candleData, prevCandles) {
-    let isPrimaryTrade = isValidTrade(candleData);
-    let trendCatcherShift = determineTrandCatcherShift(candleData);
-
     // Check Previous Order
     let prevTrade = await fatchPreviousTrade(candleData);
     if (prevTrade) {
         return handleTradeWithExistingTrade(
-            isPrimaryTrade,
-            trendCatcherShift,
             prevTrade,
             candleData,
             prevCandles
         );
     }
-    // Check IF tread actionable or not
-    if (!isPrimaryTrade.status && !trendCatcherShift) {
-        return {
-            isExecutable: false,
-            reason: SETTINGS.MESSAGES.ORDER.cancle.TrandCatcherSmartTrailNotInFavour,
-        };
-    }
 
-    let direction = isPrimaryTrade.direction
-        ? isPrimaryTrade.direction
-        : trendCatcherShift;
-
-    await handleTrade({ candleData, direction, prevCandles });
+    return await handleTrade({ candleData, prevCandles });
 }
 
 /**
- * This function will be responsible for execute trade
- * @param {direction , candleData} param0
+ * 
+ * @param {} param0 
+ * @returns 
  */
-async function handleTrade({ direction, candleData, prevCandles }) {
-    let isFalseTrade = isTradeFalsifiable({ direction, candleData, prevCandles });
-
-    if (isFalseTrade) {
-        telegram.falseOrder({
-            direction,
-            reason: isFalseTrade,
-        });
+async function handleTrade({candleData, prevCandles }) {
+    const tradeValidity = checkTradeValidity(candleData);
+    const seonderyTrendValidityShift = determineTrendCatcherShift(candleData);
+    
+    if (!canExecuteTrade(tradeValidity, seonderyTrendValidityShift, candleData)) {
         return false;
     }
 
-    let processedLeverage = handleLeverage(direction, candleData, prevCandles);
+    let direction = tradeValidity.direction || seonderyTrendValidityShift;
+    if (isFalsifiableTrade(direction, candleData, prevCandles)) {
+        return false; // telegram.falseOrder is called within isFalsifiableTrade
+    }
 
-    // Send the leverage alert
+    const leverageDetails = handleLeverage(direction, candleData, prevCandles);
+    alertLeverage(leverageDetails);
+
+    const tradeDetails = constructTradePayload(direction, candleData, leverageDetails.value);
+    return await executeTrade(tradeDetails);
+}
+
+function checkTradeValidity(candleData) {
+    return isValidTrade(candleData);
+}
+
+function canExecuteTrade(tradeValidity, seonderyTrendValidityShift, candleData) {
+    return tradeValidity.status || seonderyTrendValidityShift;
+}
+
+function isFalsifiableTrade(direction, candleData, prevCandles) {
+    const falsifyResult = isTradeFalsifiable({ direction, candleData, prevCandles });
+    if (falsifyResult) {
+        telegram.falseOrder({
+            direction,
+            reason: falsifyResult,
+        });
+    }
+    return falsifyResult;
+}
+
+function alertLeverage(leverageDetails) {
     telegram.sendMessage(
-        `Trade Leverage Gonna be ${processedLeverage.value} \n Reson : ${processedLeverage.reason}`
+        `Trade Leverage Gonna be ${leverageDetails.value} \n Reason : ${leverageDetails.reason}`
     );
+}
 
-    // Execute the trade
-    let entryPrice =
-        direction == "Long"
-            ? candleData.longEntryPrice
-            : candleData.shortEntryPrice;
-    let profitTake =
-        direction == "Long"
-            ? candleData.longProfitTakeZones
-            : candleData.shortProfitTakeZones;
-    let coin = candleData.symbol;
-    let exchange = SETTINGS.order.exchange;
+function constructTradePayload(direction, candleData, leverage) {
+    const entryPriceKey = direction === "Long" ? 'longEntryPrice' : 'shortEntryPrice';
+    const profitTakeKey = direction === "Long" ? 'longProfitTakeZones' : 'shortProfitTakeZones';
 
-    let tradePayload = {
+    return {
         name: SETTINGS.order.name,
         status: "running",
-        coin,
-        exchange,
-        leverage: processedLeverage.value,
-        leverageType: SETTINGS.order.laverageType,
+        coin: candleData.symbol,
+        exchange: SETTINGS.order.exchange,
+        leverage,
+        leverageType: SETTINGS.order.leverageType,
         direction,
-        entryPrice,
-        profitTakeZones: profitTake,
+        entryPrice: candleData[entryPriceKey],
+        profitTakeZones: candleData[profitTakeKey],
     };
-    await handleTradeExecute(tradePayload);
 }
+
+async function executeTrade(tradeDetails) {
+    return await handleTradeExecute(tradeDetails);
+}
+
+
+
+
 
 /**
  * This function will be responsible for Execute Trade
@@ -115,352 +127,7 @@ async function handleTradeExecute(payload) {
     }
 }
 
-/**
- * This function will handle trade leverage
- * @param {candleData} candleData
- * @param {prevCandleData[]} prevCandles
- * @returns
- */
-function handleLeverage(direction, candleData, prevCandles) {
-    // All Conditions Will Goes Here
-    let OneXTreaty = checkOneXLeverageTreaty(direction, candleData);
-    let TwoXTreaty = checkTwoXLeverageTreaty(direction, candleData);
-    let ThreeXTreaty = checkThreeXLeverageTreaty(direction, candleData);
-    let FiveXTreaty = checkFiveXTreaty(direction, candleData);
-    let SixXTreaty = checkSixXLeverageTreaty(direction, candleData);
 
-    let leverage = 1;
-    let reason = "";
-    function addCredentials({ leverage: _leverage, reason: _reason }) {
-        leverage = _leverage;
-        reason = _reason;
-    }
-
-    if (OneXTreaty.status) {
-        addCredentials(OneXTreaty);
-    } else if (TwoXTreaty.status) {
-        addCredentials(TwoXTreaty);
-    } else if (ThreeXTreaty.status) {
-        addCredentials(ThreeXTreaty);
-    } else if (FiveXTreaty.status) {
-        addCredentials(FiveXTreaty);
-    } else if (SixXTreaty.status) {
-        addCredentials(SixXTreaty);
-    } else {
-        let defaultLeverage = {
-            leverage: SETTINGS.order.defaultLeverage,
-            reason: SETTINGS.MESSAGES.ORDER.laverage.DefaultLeverageMessage,
-        };
-        addCredentials(defaultLeverage);
-    }
-
-    return {
-        value: leverage,
-        reason: reason,
-    };
-}
-
-/**
- * This function will contain 1x leverage conditions
- * @param {*} candleData
- * @returns {status : Boolean , leverage : Number , reason : string}
- */
-function checkOneXLeverageTreaty(direction, candleData) {
-    const Leverage = 1;
-    let aiChannelDirection = determinAiChannelDirection(candleData);
-    let aiSuperTrandDirection = determinAiSuperTrendDirection(candleData);
-    let trendStrength = candleData.data.trendStrength;
-    let barDirection = determinBarColorDirection(candleData);
-    let macdDirection = determineBetterMACDdirection(candleData);
-
-    let reason = null;
-
-    // This function will help to append reasons
-    function setReason(message) {
-        if (!message) {
-            return false;
-        }
-        reason ? (reason += message) : (reason = message);
-    }
-
-    if (aiChannelDirection !== aiSuperTrandDirection) {
-        setReason(
-            SETTINGS.MESSAGES.ORDER.laverage.OneXAiChannelAiSuperTrendOposite
-        );
-    }
-    if (trendStrength && trendStrength < SETTINGS.order.minTrendStrength) {
-        setReason(SETTINGS.MESSAGES.ORDER.laverage.OneXLowTrendStrength);
-    }
-    if (barDirection !== direction) {
-        setReason(SETTINGS.MESSAGES.ORDER.laverage.OneXBarOposite);
-    }
-    if (direction !== macdDirection) {
-        setReason(SETTINGS.MESSAGES.ORDER.laverage.OneXBatterMacdOpositeDirection);
-    }
-
-    return {
-        status: !!reason,
-        leverage: Leverage,
-        reason,
-    };
-}
-
-/**
- * This function will contain 2x leverage conditions
- * @param {*} candleData
- * @returns {status : Boolean , leverage : Number , reason : string}
- */
-function checkTwoXLeverageTreaty(direction, candleData) {
-    const Leverage = 2;
-    let aiChannelDirection = determinAiChannelDirection(candleData);
-    let aiSuperTrandDirection = determinAiSuperTrendDirection(candleData);
-    let macdDirection = determineBetterMACDdirection(candleData);
-
-    let reason = null;
-
-    // This function will help to append reasons
-    function setReason(message) {
-        if (!message) {
-            return false;
-        }
-        reason ? (reason += message) : (reason = message);
-    }
-
-    if (direction == macdDirection) {
-        setReason(SETTINGS.MESSAGES.ORDER.laverage.TwoXBatterMacdInSameDirection);
-    }
-
-    if (
-        direction == aiChannelDirection &&
-        direction == aiSuperTrandDirection &&
-        direction !== macdDirection
-    ) {
-        setReason(SETTINGS.MESSAGES.ORDER.laverage.TwoXAiInSameDirectionNotMacd);
-    }
-
-    return {
-        status: !!reason,
-        leverage: Leverage,
-        reason,
-    };
-}
-
-/**
- * This function will contain 2x leverage conditions
- * @param {*} candleData
- * @returns {status : Boolean , leverage : Number , reason : string}
- */
-function checkThreeXLeverageTreaty(direction, candleData) {
-    const Leverage = 3;
-    let aiChannelDirection = determinAiChannelDirection(candleData);
-    let aiSuperTrandDirection = determinAiSuperTrendDirection(candleData);
-    let aiSuperTrandStrongDirection =
-        determinAiSuperTrendStrongDirection(candleData);
-    let macdDirection = determineBetterMACDdirection(candleData);
-    let smartTrailDirection = candleData?.data?.smartTrailStatus;
-    let reason = null;
-    // This function will help to append reasons
-    function setReason(message) {
-        if (!message) {
-            return false;
-        }
-        reason ? (reason += message) : (reason = message);
-    }
-    if (
-        direction == smartTrailDirection &&
-        direction == aiSuperTrandDirection &&
-        direction == aiChannelDirection &&
-        direction == macdDirection &&
-        direction == aiSuperTrandStrongDirection
-    ) {
-        setReason(SETTINGS.MESSAGES.ORDER.laverage.ThreeXAllConditionMeet);
-    }
-    return {
-        status: !!reason,
-        leverage: Leverage,
-        reason,
-    };
-}
-
-/**
- * This function will contain 5x leverage conditions
- * @param {Candle Data} candleData
- * @returns {status : Boolean , leverage : Number , reason : string}
- */
-function checkFiveXTreaty(direction, candleData) {
-    const Leverage = 5;
-    let WTGreenLineDirection = determinWTLBGreenLine(candleData);
-    let greenLine = Number(candleData?.data?.wtgl);
-
-    let reason = null;
-    // This function will help to append reasons
-    function setReason(message) {
-        if (!message) {
-            return false;
-        }
-        reason ? (reason += message) : (reason = message);
-    }
-    if (
-        !isNaN(greenLine) &&
-        Math.abs(greenLine) > 40 &&
-        direction == WTGreenLineDirection
-    ) {
-        setReason(SETTINGS.MESSAGES.ORDER.laverage.FiveXAllConditionMeet);
-    }
-
-    return {
-        status: !!reason,
-        leverage: Leverage,
-        reason,
-    };
-}
-
-function checkSixXLeverageTreaty(direction, candleData) {
-    const Leverage = 6;
-    let candleDirection = determindefaultCandleDirection(candleData);
-    let aiChannelDirection = determinAiChannelDirection(candleData);
-    let aiSuperTrandDirection = determinAiSuperTrendDirection(candleData);
-    let barDirection = determinBarColorDirection(candleData);
-    let macdDirection = determineBetterMACDdirection(candleData);
-    let aiSuperTrandStrongDirection =
-        determinAiSuperTrendStrongDirection(candleData);
-    let smartTrailDirection = candleData.data.smartTrailStatus;
-
-    let reason = null;
-    // This function will help to append reasons
-    function setReason(message) {
-        if (!message) {
-            return false;
-        }
-        reason ? (reason += message) : (reason = message);
-    }
-
-    if (
-        direction == smartTrailDirection &&
-        direction == aiSuperTrandDirection &&
-        direction == aiChannelDirection &&
-        direction == macdDirection &&
-        direction == barDirection &&
-        direction == candleDirection &&
-        direction == aiSuperTrandStrongDirection
-    ) {
-        setReason(SETTINGS.MESSAGES.ORDER.laverage.SixXAllConditionMeet);
-    }
-
-    return {
-        status: !!reason,
-        leverage: Leverage,
-        reason,
-    };
-}
-
-/**
- * This function will determine WTLB Green Line
- * @param {Candle Data} candleData
- * @returns {"Long" | "Short" | false}
- */
-function determinWTLBGreenLine(candleData) {
-    let greenLine = Number(candleData?.data?.wtgl);
-    if (isNaN(greenLine)) {
-        return false;
-    }
-
-    let direction = greenLine > 0 ? "Long" : greenLine < 0 ? "Short" : false;
-    return direction;
-}
-
-/**
- * this function is for determine Ai Channels indicator direction
- * @param {Candle Data} candleData
- * @returns {"Long" | "Short" | false}
- */
-function determinAiChannelDirection(candleData) {
-    let upper = candleData?.data?.upper;
-    let lower = candleData?.data?.lower;
-    let direction =
-        isNaN(lower) && !isNaN(upper)
-            ? "Long"
-            : isNaN(upper) && !isNaN(lower)
-                ? "Short"
-                : false;
-    return direction;
-}
-
-/**
- * this function is for determine Ai Super Trand indicator's direction
- * @param {Candle Data} candleData
- * @returns {"Long" | "Short" | false}
- */
-function determinAiSuperTrendDirection(candleData) {
-    let consensus = candleData?.data?.consensus;
-    if (isNaN(consensus)) {
-        return false;
-    }
-    let direction = +consensus > 0 ? "Long" : +consensus < 0 ? "Short" : false;
-    return direction;
-}
-
-/**
- * This function is for determine Ai Super Trand indicator's Strong direction
- * @param {Candle Data} candleData
- * @returns {"Long" | "Short" | false}
- */
-function determinAiSuperTrendStrongDirection(candleData) {
-    let strongBullish = Math.abs(candleData?.data?.strongBullish);
-    let strongBearish = Math.abs(candleData?.data?.strongBearish);
-    if (!strongBearish && !strongBullish) {
-        return false;
-    }
-
-    let direction = !!strongBullish ? "Long" : !!strongBearish ? "Short" : false;
-    return direction;
-}
-
-function determindefaultCandleDirection(candleData) {
-    let candleStatus = candleData.candleStatus;
-    candleStatus = Number(candleStatus);
-    if (isNaN(candleStatus)) {
-        return false;
-    }
-
-    let direction =
-        candleStatus > 0 ? "Long" : candleStatus < 0 ? "Short" : false;
-    return direction;
-}
-
-/**
- * This function will determin the trade direction based on candle color
- * @param {Candle Data} candleData
- * @returns {"Long" | "Short" | "Neutral"}
- */
-function determinBarColorDirection(candleData) {
-    let barColor = +candleData?.data?.candleColor;
-    if (isNaN(barColor)) {
-        return false;
-    }
-    let direction = barColor > 0 ? "Long" : barColor < 0 ? "Short" : "Neutral";
-    return direction;
-}
-
-/**
- * This function will determin the trade direction based on MACD Line
- * @param {Candle Data} candleData
- * @returns {"Long" | "Short" | "Neutral"}
- */
-function determineBetterMACDdirection(candleData) {
-    let macdLine = candleData?.data?.macdLine;
-    let signalLine = candleData?.data?.signalLine;
-    if (isNaN(macdLine) || isNaN(signalLine)) {
-        return false;
-    }
-    let direction =
-        macdLine > signalLine
-            ? "Long"
-            : macdLine < signalLine
-                ? "Short"
-                : "Neutral";
-    return direction;
-}
 
 /**
  * This mathod will try to protect falst trade
@@ -531,34 +198,28 @@ function isTradeFalsifiable({ direction, candleData }) {
 /**
  * This mathod is responsible for take dicision if there is a existing trade
  * @param {Boolean | String} isPrimaryTrade
- * @param {Boolean | String} trendCatcherShift
+ * @param {Boolean | String} seonderyTrendValidityShift
  * @param {TadeObj{}} prevTrade
  * @param {CurrenctCandle{}} candleData
  * @param {PreviousCandle[]} prevCandles
  * @returns
  */
 async function handleTradeWithExistingTrade(
-    isPrimaryTrade,
-    trendCatcherShift,
     prevTrade,
     candleData,
     prevCandles
 ) {
     // If needed then close the order
-    let closeResult = await handleCloseTrend({
-        ...candleData,
-        prevTrade,
-        trendCatcherShift,
-    });
+    let closeResult = await handleCloseTrend(candleData, prevTrade);
 
-    if (!closeResult || !isPrimaryTrade.status || !trendCatcherShift) {
+    if (!closeResult) {
         return false;
     }
 
     // Give the trade for execute
     let treadPayload = {
-        direction: isPrimaryTrade.direction,
         candleData,
+        prevCandles
     };
     handleTrade(treadPayload);
 }
@@ -567,50 +228,47 @@ async function handleTradeWithExistingTrade(
  * This function will make dicition for closing order or not
  * @param {*} param0
  */
-async function handleCloseTrend(candleData) {
+async function handleCloseTrend(candleData, prevTrade) {
     try {
-        let { prevTrade, trendCatcherShift } = candleData;
-
         // Check order close reason
-        let reason = handleTradeCloseResons({
-            ...candleData.data,
-            prevTrade,
-            trendCatcherShift,
-        });
+        let reason = handleTradeCloseResons(candleData, prevTrade);
         let profitMargin = calculateTwoRangePercentage(
             prevTrade.entryPrice,
             candleData.close
         );
         let leverage = prevTrade.leverage;
         if (reason) {
-            
-            let message = `Previous Thread will close,
-            Your Profit would be: ${profitMargin}%
-            And your Profit With Leverage would be: ${(profitMargin * leverage).toString()}
-            Reason:
-            ${reason}`;
-            
-            await telegram.sendMessage(message)
+            await sendLeverageAlert(leverage, profitMargin)
             // Update the order
-            await Trade.updateOne(
-                { _id: prevTrade._id },
-                {
-                    status: "closed",
-                    endPrice: candleData.close,
-                    reason: reason,
-                    isProfitable: profitMargin > 0,
-                    profitMargin,
-                }
-            );
-            // Send Order to telegram
-            await telegram.closeOrder({
-                coin: prevTrade.coin,
-            });
-
+            await handleCloseOrderActions(prevTrade, reason, profitMargin)
             return true;
-        } else {
-            return false;
         }
+        return false;
+    } catch (err) {
+        console.error(err)
+    }
+}
+
+
+async function handleCloseOrderActions(prevTrade, reason, profitMargin) {
+    try {
+
+        await Trade.updateOne(
+            { _id: prevTrade._id },
+            {
+                status: "closed",
+                endPrice: candleData.close,
+                reason: reason,
+                isProfitable: profitMargin > 0,
+                profitMargin,
+            }
+        );
+        // Send Order to telegram
+        telegram.closeOrder({
+            coin: prevTrade.coin,
+        });
+
+        return true
     } catch (err) {
         telegram.sendMessage(
             "Error Occured while updating the order on db for close \n Error:" +
@@ -619,14 +277,31 @@ async function handleCloseTrend(candleData) {
     }
 }
 
+
+/**
+ * This function will send the leverage alert to telegram
+ * @param {Number} leverage 
+ * @param {Number} profitMargin 
+ * @returns 
+ */
+function sendLeverageAlert(leverage, profitMargin) {
+    let message = `Previous Thread will close,
+    Your Profit would be: ${profitMargin}%
+    And your Profit With Leverage would be: ${(profitMargin * leverage).toString()}
+    Reason:
+    ${reason}`;
+
+    return telegram.sendMessage(message)
+}
+
 /**
  * This function will be responsible for closing order
  * @param {Object} candleData Candle data with extra info
  * @returns
  */
-function handleTradeCloseResons(candleData) {
-    let { prevTrade, smartTrailShift, trendCatcherShift, trendStrength } =
-        candleData;
+function handleTradeCloseResons(candleData, prevTrade) {
+    let { smartTrailShift, seonderyTrendValidityShift, trendStrength } =
+        candleData.data;
     let prevTradeDirection = prevTrade.direction;
 
     let reason = null;
@@ -637,7 +312,7 @@ function handleTradeCloseResons(candleData) {
             : (reason = SETTINGS.MESSAGES.ORDER.cancle.SmartTrailOpositeDirection);
     }
 
-    if (trendCatcherShift && prevTradeDirection !== trendCatcherShift) {
+    if (seonderyTrendValidityShift && prevTradeDirection !== seonderyTrendValidityShift) {
         reason
             ? (reason += SETTINGS.MESSAGES.ORDER.cancle.TrendCatcherOpositeDirection)
             : (reason = SETTINGS.MESSAGES.ORDER.cancle.TrendCatcherOpositeDirection);
@@ -690,8 +365,8 @@ async function fatchPreviousTrade(candleData) {
  * @param {Candle Data} candleData
  * @returns {Boolean | Direction}
  */
-function determineTrandCatcherShift(candleData) {
-    let shift = candleData.data.trendCatcherShift;
+function determineTrendCatcherShift(candleData) {
+    let shift = candleData.data.seonderyTrendValidityShift;
     if (!shift) {
         return false;
     }
