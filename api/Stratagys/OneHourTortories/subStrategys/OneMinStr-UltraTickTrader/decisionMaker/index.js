@@ -20,8 +20,7 @@ async function HandleUltraTickTrader(candleData) {
         prevCandles.push(candleData)
         prevCandles = sortCandlesDescending(prevCandles);
         // This function will handle order should take or not
-        let isValidOrder = HandleTradeOrder(candleData , prevCandles)
-
+        HandleTradeOrder(candleData , prevCandles)
 
 
     } catch (err) {
