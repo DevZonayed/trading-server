@@ -253,6 +253,11 @@ async function handleCloseTrend(candleData, prevTrade) {
 async function handleCloseOrderActions(prevTrade, reason, profitMargin) {
     try {
 
+        // Send Order to telegram
+        await telegram.closeOrder({
+            coin: prevTrade.coin,
+        });
+
         await Trade.updateOne(
             { _id: prevTrade._id },
             {
@@ -262,15 +267,21 @@ async function handleCloseOrderActions(prevTrade, reason, profitMargin) {
                 isProfitable: profitMargin > 0,
                 profitMargin,
             }
-        );
-        // Send Order to telegram
-        telegram.closeOrder({
-            coin: prevTrade.coin,
+        ).then(res => {
+            telegram.sendMessage(
+                "Response of updating order db \n res:" +
+                JSON.stringify(res)
+            );    
+        }).catch(err => {
+            telegram.sendMessage(
+                "Error Occured while updating the order on db for close \n Error:" +
+                JSON.stringify(err)
+            );    
         });
 
         return true
     } catch (err) {
-        telegram.sendMessage(
+        await telegram.sendMessage(
             "Error Occured while updating the order on db for close \n Error:" +
             JSON.stringify(err)
         );
