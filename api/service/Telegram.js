@@ -87,12 +87,12 @@ class Telegram {
 
     let message = `COIN: ${coin}\nDirection: ${direction}\nExchange: ${exchange}\nLeverage: ${leverage}\nENTRY: ${entry}\nTARGET: ${target}`;
 
-    this.sendMessage(message);
+    return this.sendMessage(message);
   }
 
   closeOrder({ coin }) {
     let message = `CLOSE ${coin}`;
-    this.sendMessage(message);
+    return this.sendMessage(message);
   }
 }
 
