@@ -48,7 +48,7 @@ async function handleTrade({candleData, prevCandles }) {
     }
 
     const leverageDetails = handleLeverage(direction, candleData, prevCandles);
-    alertLeverage(leverageDetails);
+    leverageAlert(leverageDetails);
 
     const tradeDetails = constructTradePayload(direction, candleData, leverageDetails.value);
     return await executeTrade(tradeDetails);
@@ -73,7 +73,7 @@ function isFalsifiableTrade(direction, candleData, prevCandles) {
     return falsifyResult;
 }
 
-function alertLeverage(leverageDetails) {
+function leverageAlert(leverageDetails) {
     telegram.sendMessage(
         `Trade Leverage Gonna be ${leverageDetails.value} \n Reason : ${leverageDetails.reason}`
     );
@@ -238,7 +238,7 @@ async function handleCloseTrend(candleData, prevTrade) {
         );
         let leverage = prevTrade.leverage;
         if (reason) {
-            await sendLeverageAlert(leverage, profitMargin)
+            await sendOrderCloseAlertAlert(leverage, profitMargin , reason)
             // Update the order
             await handleCloseOrderActions(prevTrade, reason, profitMargin)
             return true;
@@ -284,7 +284,7 @@ async function handleCloseOrderActions(prevTrade, reason, profitMargin) {
  * @param {Number} profitMargin 
  * @returns 
  */
-function sendLeverageAlert(leverage, profitMargin) {
+function sendOrderCloseAlertAlert(leverage, profitMargin , reason) {
     let message = `Previous Thread will close,
     Your Profit would be: ${profitMargin}%
     And your Profit With Leverage would be: ${(profitMargin * leverage).toString()}
