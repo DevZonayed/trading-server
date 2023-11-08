@@ -240,7 +240,7 @@ async function handleCloseTrend(candleData, prevTrade) {
         if (reason) {
             await sendOrderCloseAlertAlert(leverage, profitMargin , reason)
             // Update the order
-            await handleCloseOrderActions(prevTrade, reason, profitMargin)
+            await handleCloseOrderActions(prevTrade , candleData, reason, profitMargin)
             return true;
         }
         return false;
@@ -250,7 +250,7 @@ async function handleCloseTrend(candleData, prevTrade) {
 }
 
 
-async function handleCloseOrderActions(prevTrade, reason, profitMargin) {
+async function handleCloseOrderActions(prevTrade,candleData , reason, profitMargin) {
     try {
 
         // Send Order to telegram
@@ -267,17 +267,7 @@ async function handleCloseOrderActions(prevTrade, reason, profitMargin) {
                 isProfitable: profitMargin > 0,
                 profitMargin,
             }
-        ).then(res => {
-            telegram.sendMessage(
-                "Response of updating order db \n res:" +
-                JSON.stringify(res)
-            );    
-        }).catch(err => {
-            telegram.sendMessage(
-                "Error Occured while updating the order on db for close \n Error:" +
-                JSON.stringify(err)
-            );    
-        });
+        )
 
         return true
     } catch (err) {
