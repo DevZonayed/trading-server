@@ -9,10 +9,6 @@ const {
   checkArrayContainsAllItems,
   objectToString,
   sortCandlesDescending,
-  upperCross,
-  underCross,
-  turningBullish,
-  turningBearish,
 } = require("./utils");
 const { Telegram } = require("../../service/Telegram");
 
