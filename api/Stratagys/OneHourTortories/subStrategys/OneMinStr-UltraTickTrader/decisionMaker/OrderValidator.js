@@ -367,7 +367,7 @@ async function fatchPreviousTrade(candleData) {
  * @returns {Boolean | Direction}
  */
 function determineTrendCatcherShift(candleData) {
-    let shift = candleData.data.seonderyTrendValidityShift;
+    let shift = candleData.data.trendCatcherShift;
     if (!shift) {
         return false;
     }
