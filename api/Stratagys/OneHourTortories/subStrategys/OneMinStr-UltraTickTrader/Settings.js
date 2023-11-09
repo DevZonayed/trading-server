@@ -8,7 +8,7 @@ const SETTINGS = {
     order: {
         name: "UltraTickTrader",
         exchange: "Binance",
-        laverageType : "Isolated",
+        leverageType : "Isolated",
         minimumTrendStrength : 5,
         maximumTailSize : 0.15,
         maximumCandleSize : 1,
