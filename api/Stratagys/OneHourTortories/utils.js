@@ -281,13 +281,24 @@ function crossunder(candles, keyAPath, keyBPath) {
  * @param {Number} after 
  * @returns 
  */
-function calculateTwoRangePercentage( before, after) {
+function calculateTwoRangePercentage(before, direction, after) {
   before = +before;
   after = +after;
 
   // Calculate the candle body size percentage compared to the close
   const bodySizePercentage = (((after - before) / after) * 100).toFixed(2);
-  return bodySizePercentage;
+
+  if (direction == "Long") {
+    return bodySizePercentage;
+  }
+  if (bodySizePercentage < 0) {
+    return Math.abs(bodySizePercentage)
+  } else if (bodySizePercentage >= 0) {
+    return -Math.abs(bodySizePercentage)
+  }
+
+
+
 }
 
 

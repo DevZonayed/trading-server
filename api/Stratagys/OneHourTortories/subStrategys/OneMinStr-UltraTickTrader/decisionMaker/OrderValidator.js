@@ -234,6 +234,7 @@ async function handleCloseTrend(candleData, prevTrade) {
         let reason = handleTradeCloseResons(candleData, prevTrade);
         let profitMargin = calculateTwoRangePercentage(
             prevTrade.entryPrice,
+            prevTrade.direction,
             candleData.close
         );
         let leverage = prevTrade.leverage;
