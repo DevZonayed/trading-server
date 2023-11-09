@@ -245,19 +245,23 @@ async function processTrendCatcherData(candleData, setData) {
 // Utility Functions:
 
 async function fetchPreviousCandles({ time, timeframe, symbol }) {
-  const dateQueryForPrev = generateDateRageFilterMongoose(
-    generateMultiCandleTimeRange(time, +timeframe, 3, 0)
-  );
-
+  try{
+    const dateQueryForPrev = generateDateRageFilterMongoose(
+      generateMultiCandleTimeRange(time, +timeframe, 3, 0)
+    );
   
-  let prevCandles = await CandleData.find({
-    name: SETTINGS.strategyName,
-    symbol,
-    timeframe,
-    time: dateQueryForPrev,
-  });
-  
-  return sortCandlesDescending(prevCandles);
+    
+    let prevCandles = await CandleData.find({
+      name: SETTINGS.strategyName,
+      symbol,
+      timeframe,
+      // time: dateQueryForPrev,
+    }).sort({createdAt : -1}).limit(3);
+    
+    return sortCandlesDescending(prevCandles);
+  }catch(err){
+    console.error("there is an error while fatching previous candle data" + err)
+  }
 }
 
 function determineTrendCatcherStatus(prevCandles , status) {
