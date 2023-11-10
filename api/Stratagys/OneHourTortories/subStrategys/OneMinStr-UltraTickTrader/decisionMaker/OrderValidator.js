@@ -34,10 +34,10 @@ async function HandleTradeOrder(candleData, prevCandles) {
  * @param {} param0 
  * @returns 
  */
-async function handleTrade({candleData, prevCandles }) {
+async function handleTrade({ candleData, prevCandles }) {
     const tradeValidity = checkTradeValidity(candleData);
-    const seonderyTrendValidityShift = determineTrendCatcherShift(candleData);
-    
+    const seonderyTrendValidityShift = determineSeonderyTrendValidityShift(candleData);
+
     if (!canExecuteTrade(tradeValidity, seonderyTrendValidityShift, candleData)) {
         return false;
     }
@@ -239,9 +239,9 @@ async function handleCloseTrend(candleData, prevTrade) {
         );
         let leverage = prevTrade.leverage;
         if (reason) {
-            await sendOrderCloseAlertAlert(leverage, profitMargin , reason)
+            await sendOrderCloseAlertAlert(leverage, profitMargin, reason)
             // Update the order
-            await handleCloseOrderActions(prevTrade , candleData, reason, profitMargin)
+            await handleCloseOrderActions(prevTrade, candleData, reason, profitMargin)
             return true;
         }
         return false;
@@ -251,7 +251,7 @@ async function handleCloseTrend(candleData, prevTrade) {
 }
 
 
-async function handleCloseOrderActions(prevTrade,candleData , reason, profitMargin) {
+async function handleCloseOrderActions(prevTrade, candleData, reason, profitMargin) {
     try {
 
         // Send Order to telegram
@@ -286,7 +286,7 @@ async function handleCloseOrderActions(prevTrade,candleData , reason, profitMarg
  * @param {Number} profitMargin 
  * @returns 
  */
-function sendOrderCloseAlertAlert(leverage, profitMargin , reason) {
+function sendOrderCloseAlertAlert(leverage, profitMargin, reason) {
     let message = `Previous Thread will close,
     Your Profit would be: ${profitMargin}%
     And your Profit With Leverage would be: ${(profitMargin * leverage).toString()}
@@ -302,8 +302,9 @@ function sendOrderCloseAlertAlert(leverage, profitMargin , reason) {
  * @returns
  */
 function handleTradeCloseResons(candleData, prevTrade) {
-    let { smartTrailShift, seonderyTrendValidityShift, trendStrength } =
+    let { smartTrailShift, trendStrength } =
         candleData.data;
+    const seonderyTrendValidityShift = determineSeonderyTrendValidityShift(candleData);
     let prevTradeDirection = prevTrade.direction;
 
     let reason = null;
@@ -361,6 +362,14 @@ async function fatchPreviousTrade(candleData) {
     }
     return previousTrade;
 }
+
+
+
+function determineSeonderyTrendValidityShift(candleData){
+    let seonderyTrendValidityShift = determineTrendCatcherShift(candleData)
+    return seonderyTrendValidityShift;
+}
+
 
 /**
  * this will check trandCatcher shift available or not and return the shift direction or false
