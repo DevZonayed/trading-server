@@ -59,7 +59,13 @@ function checkTradeValidity(candleData) {
 }
 
 function canExecuteTrade(tradeValidity, seonderyTrendValidityShift, candleData) {
-    return tradeValidity.status || seonderyTrendValidityShift;
+
+    let smartTrailStatus = candleData?.data?.smartTrailStatus;
+    if(seonderyTrendValidityShift && seonderyTrendValidityShift == smartTrailStatus ){
+        return true;
+    }
+
+    return tradeValidity.status;
 }
 
 function isFalsifiableTrade(direction, candleData, prevCandles) {
