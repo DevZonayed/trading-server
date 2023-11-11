@@ -347,9 +347,11 @@ function generateTakeProfitPrices(upperEntry, lowerEntry, percentageArr) {
 }
 // Calculate The proofit prices
 function calculateTargetPrice(entryPrice, profitPercentage, isLongOrder) {
+  const priceThreshold = (entryPrice * (profitPercentage / 100)) 
+  
   if (isLongOrder) {
-    return entryPrice * (1 + profitPercentage / 100);
+    return entryPrice + priceThreshold;
   } else {
-    return entryPrice * (1 - profitPercentage / 100);
+    return entryPrice - priceThreshold;
   }
 }
