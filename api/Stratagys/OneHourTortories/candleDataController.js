@@ -135,7 +135,7 @@ async function processDefaultData(candleData, setData) {
 
   const longEntryPrice = calculateTargetPrice(+close, SETTINGS.entryPricePercent, true);
   const shortEntryPrice = calculateTargetPrice(+close, SETTINGS.entryPricePercent, false);
-  const profitZones = generateTakeProfitPrices(longEntryPrice, shortEntryPrice, SETTINGS.profitTakePercentage);
+  const profitZones = calculateTakeProfitPrices(longEntryPrice, shortEntryPrice, SETTINGS.profitTakePercentage);
 
   Object.assign(setData, {
     open: +open,
@@ -333,7 +333,7 @@ module.exports = CandleDataController;
 
 
 // Generate Profit Zones
-function generateTakeProfitPrices(upperEntry, lowerEntry, percentageArr) {
+function calculateTakeProfitPrices(upperEntry, lowerEntry, percentageArr) {
   let longProfitTakeZones = percentageArr.map((percentage) =>
     calculateTargetPrice(upperEntry, percentage, true)
   );
@@ -346,12 +346,13 @@ function generateTakeProfitPrices(upperEntry, lowerEntry, percentageArr) {
   };
 }
 // Calculate The proofit prices
-function calculateTargetPrice(entryPrice, profitPercentage, isLongOrder) {
-  const priceThreshold = (entryPrice * (profitPercentage / 100)) 
-  
+function calculateTargetPrice(entryPrice, isLongOrder, profitPercentage) {
+  const decimalProfitPercentage = profitPercentage / 100;
+  const priceThreshold = entryPrice * decimalProfitPercentage;
+
   if (isLongOrder) {
-    return entryPrice + priceThreshold;
+    return Math.round((entryPrice + priceThreshold) * 10000) / 10000;
   } else {
-    return entryPrice - priceThreshold;
+    return Math.round((entryPrice - priceThreshold) * 10000) / 10000;
   }
 }
