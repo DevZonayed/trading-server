@@ -370,8 +370,8 @@ function determineSeonderyTrendValidityShift(candleData , prevCandles){
     let AiChannelShift = determineAiChannelShift(candleData , prevCandles)
 
     
-    // return seonderyTrendValidityShift; 
-    return AiChannelShift;
+    return seonderyTrendValidityShift; 
+    // return AiChannelShift;
 }
 
 
