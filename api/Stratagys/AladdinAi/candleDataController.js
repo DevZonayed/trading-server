@@ -106,7 +106,7 @@ async function processDataByType(candleData, setData) {
       // THis is for proccess Llb10 data also according to previous candle
       let { timeframe, symbol } = candleData
       let LLB10Data = await fetchPreviousCandles({ timeframe, symbol })
-      let { hullLongShift10, hullShortShift10, long10, short10, ...restData } = LLB10Data[1]?.data
+      let { hullLongShift10 = 0, hullShortShift10 = 0, long10 = 0, short10 = 0, ...restData } = LLB10Data[1]?.data || {}
       await processLlb10Data(restData, setData)
     }catch(err){
       console.error(err)
