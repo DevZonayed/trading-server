@@ -40,10 +40,7 @@ function isNewCandle(latestCandle, candleData) {
   
   // Validates if the candleData meets the criteria for making a decision
   function isValidCandleForAladdinAi(candleData) {
-    return checkArrayContainsAllItems({
-      data: SETTINGS.strategy.orderTakeKeys,
-      array: candleData.type,
-    }) || checkArrayContainsAllItems({
+    return  checkArrayContainsAllItems({
       data: SETTINGS.strategy.orderTakeKeys10,
       array: candleData.type,
     });
