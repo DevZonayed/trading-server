@@ -19,7 +19,7 @@ const SETTINGS = {
         channelId: "-1001916901773"
     },
     entryPricePercent: 0.05,
-    profitTakePercentage: [0.30, 0.90, 1, 1.90, 2, 3],
+    profitTakePercentage: [0.30, 0.60, 1, 1.5, 2, 2.5 , 3],
     MESSAGES: {
         restartWatching: "Restart Watching...",
         prevCandleFatchProblem : "There is a error while fatching previous candleData \n",
