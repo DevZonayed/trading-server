@@ -69,7 +69,7 @@ const initialCandleCalculation = AsyncHandler(async (req, res) => {
     console.error("Unknown Data Pushed", candleData);
     return res.json({ message: "Unknown Data" });
   }
-  // telegram.sendMessage("Valid Data Pushed\n" + objectToString(candleData))
+  telegram.sendMessage("Valid Data Pushed\n" + objectToString(candleData))
 
   // Depending on the data, process accordingly
   await processDataByType(candleData, setData);
