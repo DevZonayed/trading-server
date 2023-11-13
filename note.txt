@@ -2,3 +2,7 @@
 //app.get("*", function (req, res) {
 //  res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
 //});
+
+
+
+symbol = BTCUSDT \ntime = {{time}} \ntype = llb \ntimeframe = {{interval}} \nstrongBullish ={{plot("Strong Bullish")}} \nstrongBearish = {{plot("Strong Bearish")}} \nconsensus = {{plot("Consensus")}} \nhistogram = {{plot("Histogram")}} \nsignalLine = {{plot("Signal Line")}} \nmacdLine = {{plot("MACD Line")}} \nsignalLineCross = {{plot("Crossing")}} \nupper = {{plot("Upper")}} \nlower = {{plot("Lower")}} \naverage = {{plot("Average")}}
