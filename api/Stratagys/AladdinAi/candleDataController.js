@@ -82,7 +82,7 @@ const initialCandleCalculation = AsyncHandler(async (req, res) => {
   if (isNewCandleFulfilled(newCandle)) {
     // sendTelegramMessage(newCandle);
   }
-  telegram.sendMessage("Type Pushed\n" + candleData?.type?.join(","))
+  telegram.sendMessage("Type Pushed\n" + newCandle?.type?.join(","))
   
   res.json({ message: "Success" });
 });
