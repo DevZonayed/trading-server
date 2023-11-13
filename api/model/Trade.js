@@ -35,6 +35,10 @@ const tradeSchema = new mongoose.Schema(
     profitTakeZones: {
       type: Array,
     },
+    candleId : {
+      type : mongoose.Schema.Types.ObjectId,
+      ref : "CandleData"
+    },
     isProfitable : Boolean,
     profitMargin : Number,
     strategyData: Object,
