@@ -66,10 +66,8 @@ const initialCandleCalculation = AsyncHandler(async (req, res) => {
   // Check the required data presence
   if (!isDataValid(candleData)) {
     telegram.sendMessage("Unknown Data Pushed\n" + objectToString(candleData))
-    console.error("Unknown Data Pushed", candleData);
     return res.json({ message: "Unknown Data" });
   }
-  telegram.sendMessage("Valid Data Pushed\n" + objectToString(candleData))
 
   // Depending on the data, process accordingly
   await processDataByType(candleData, setData);
@@ -100,17 +98,19 @@ async function processDataByType(candleData, setData) {
   if (dataChecking({ keys: DEFAULT_CANDLE_DATA_KEYS, data: candleData })) {
     await processDefaultData(candleData, setData);
   } else if (dataChecking({ keys: LLB10_CANDLE_DATA_KEYS, data: candleData })) {
-    console.warn("LLB10 Data Found")
     await processLlb10Data(candleData, setData);
   } else if (dataChecking({ keys: LLB_CANDLE_DATA_KEYS, data: candleData })) {
-    console.warn("LLB Data Found")
-    await processLlbData(candleData, setData);
-
-    // THis is for proccess Llb10 data also according to previous candle
-    let { timeframe, symbol } = candleData
-    let LLB10Data = await fetchPreviousCandles({ timeframe, symbol })
-    let { hullLongShift10, hullShortShift10, long10, short10, ...restData } = LLB10Data[1]?.data
-    await processLlb10Data(restData, setData)
+    try{
+      await processLlbData(candleData, setData);
+  
+      // THis is for proccess Llb10 data also according to previous candle
+      let { timeframe, symbol } = candleData
+      let LLB10Data = await fetchPreviousCandles({ timeframe, symbol })
+      let { hullLongShift10, hullShortShift10, long10, short10, ...restData } = LLB10Data[1]?.data
+      await processLlb10Data(restData, setData)
+    }catch(err){
+      console.error(err)
+    }
   }
 }
 
