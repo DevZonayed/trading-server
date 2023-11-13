@@ -68,21 +68,22 @@ const initialCandleCalculation = AsyncHandler(async (req, res) => {
     telegram.sendMessage("Unknown Data Pushed\n" + objectToString(candleData))
     return res.json({ message: "Unknown Data" });
   }
-
+  
   // Depending on the data, process accordingly
   await processDataByType(candleData, setData);
-
+  
   if (Object.keys(setData).length) {
     updateQuery.$set = setData;
   }
-
+  
   const newCandle = await updateCandleData(candleData, updateQuery);
-
+  
   // Send Telegram message if the candle is fulfilled
   if (isNewCandleFulfilled(newCandle)) {
     // sendTelegramMessage(newCandle);
   }
-
+  telegram.sendMessage("Type Pushed\n" + candleData?.type?.join(","))
+  
   res.json({ message: "Success" });
 });
 
