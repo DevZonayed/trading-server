@@ -37,7 +37,7 @@ const SETTINGS = require("./Settings");
 
 const REQUIRED_DATA_KEYS = ["symbol", "time", "type", "timeframe"];
 const DEFAULT_CANDLE_DATA_KEYS = [...REQUIRED_DATA_KEYS, "open", "close", "high", "low", "volume", "ema", "change", "candleStatus", "bodySize", "upperTail", "lowerTail"];
-const LLB_CANDLE_DATA_KEYS = [...REQUIRED_DATA_KEYS, "strongBullish", "strongBearish", "consensus", "histogram", "signalLine", "macdLine", "signalLineCross", "upper", "lower", "average", "hullLongShift", "hullShortShift", "hullLong", "hullShort"];
+const LLB_CANDLE_DATA_KEYS = [...REQUIRED_DATA_KEYS, "strongBullish", "strongBearish", "consensus", "histogram", "signalLine", "macdLine", "signalLineCross", "upper", "lower", "hullLongShift", "hullShortShift", "hullLong", "hullShort"];
 
 
 const LLB10_CANDLE_DATA_KEYS = [...REQUIRED_DATA_KEYS, "hullLongShift10", "hullShortShift10", "hullLong10", "hullShort10", "strongBullish10", "strongBearish10", "long10", "short10"];
