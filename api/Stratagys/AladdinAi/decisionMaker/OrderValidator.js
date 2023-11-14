@@ -286,14 +286,22 @@ function sendOrderCloseAlertAlert(leverage, profitMargin, reason) {
  */
 function handleTradeCloseResons(candleData, prevCandles, prevTrade) {
     let prevTradeDirection = prevTrade.direction;
-    let reason = null;
     let hullLineDirection = determineHullLineDirection(candleData)
+    let batterMacdDirection = determineBatterMacdDirection(candleData)
+    let reason = null;
 
     if (prevTradeDirection !== hullLineDirection) {
         reason
             ? (reason += SETTINGS.MESSAGES.ORDER.cancle.HullLineOposite)
             : (reason = SETTINGS.MESSAGES.ORDER.cancle.HullLineOposite);
     }
+
+    if (prevTradeDirection !== batterMacdDirection) {
+        reason
+            ? (reason += SETTINGS.MESSAGES.ORDER.cancle.MacdDirectionOposite)
+            : (reason = SETTINGS.MESSAGES.ORDER.cancle.MacdDirectionOposite);
+    }
+
     return reason;
 }
 
@@ -303,10 +311,8 @@ function handleTradeCloseResons(candleData, prevCandles, prevTrade) {
  * @returns
  */
 function isValidTrade(candleData) {
-    let { strongBullish10, strongBearish10, hullLong10, hullShort10, signalLine10,
-        macdLine10 } = candleData.data
-
-    let macdDirection = macdLine10 > signalLine10 ? "Long" : macdLine10 <= signalLine10 ? "Short" : null
+    let { strongBullish10, strongBearish10, hullLong10, hullShort10 } = candleData.data
+    let macdDirection = determineBatterMacdDirection(candleData)
 
     let strongDirection =
         !!strongBullish10 && !!hullLong10
@@ -325,6 +331,8 @@ function isValidTrade(candleData) {
         direction,
     };
 }
+
+
 
 /**
  * This function will help to find running Trade
@@ -356,6 +364,12 @@ function determineHullLineDirection(candleData) {
     return direction
 }
 
+
+function determineBatterMacdDirection(candleData) {
+    const { signalLine10, macdLine10 } = candleData.data
+    let macdDirection = macdLine10 > signalLine10 ? "Long" : macdLine10 <= signalLine10 ? "Short" : null
+    return macdDirection
+}
 
 function determineSeonderyTrendValidityShift(candleData, prevCandles) {
     // let seonderyTrendValidityDirection = determineTrendCatcherShift(candleData)
