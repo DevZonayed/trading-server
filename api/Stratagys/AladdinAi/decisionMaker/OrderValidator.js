@@ -200,11 +200,11 @@ async function handleTradeWithExistingTrade(
     }
 
     // Give the trade for execute
-    let treadPayload = {
-        candleData,
-        prevCandles
-    };
-    handleTrade(treadPayload);
+    // let treadPayload = {
+    //     candleData,
+    //     prevCandles
+    // };
+    // handleTrade(treadPayload);
 }
 
 /**
