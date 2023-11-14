@@ -324,16 +324,21 @@ function isValidTrade(candleData) {
  * @returns {Boolean | tradDocument}
  */
 async function fatchPreviousTrade(candleData) {
-    let query = {
-        name: SETTINGS.order.name,
-        status: "running",
-        coin: candleData.symbol,
-    };
-    let previousTrade = await Trade.findOne(query);
-    if (previousTrade == null) {
-        return false;
+    try{
+        let query = {
+            name: SETTINGS.order.name,
+            status: "running",
+            coin: candleData.symbol,
+        };
+        let previousTrade = await Trade.findOne(query);
+        if (previousTrade == null) {
+            return false;
+        }
+        return previousTrade;
+
+    }catch(err){
+        console.warn(err)
     }
-    return previousTrade;
 }
 
 
