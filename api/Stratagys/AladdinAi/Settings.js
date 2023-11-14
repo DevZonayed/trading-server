@@ -34,7 +34,8 @@ const SETTINGS = {
                 WtLbOpositeGreenLine : "WT_LB Greenline is oposite direction and it's greater then 40. \n",
                 MaxTailHapped : "The tail of the order candle if so over! \n",
                 MaximumBodySizeNoticed : "Candle low to high percentage is touched maximum candle size \n",
-                HullLineOposite : "Hull Line Has Oposite Direction of Signal."
+                HullLineOposite : "Hull Line Has Oposite Direction of Signal.",
+                MacdDirectionOposite : "Macd Direction is oposite Has Oposite Direction of Signal."
             },
             execute : {
             },
