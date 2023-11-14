@@ -36,7 +36,7 @@ async function HandleTradeOrder(candleData, prevCandles) {
  */
 async function handleTrade({ candleData, prevCandles }) {
     const tradeValidity = checkTradeValidity(candleData);
-    const seonderyTrendValidityDirection = determineSeonderyTrendValidityShift(candleData , prevCandles);
+    const seonderyTrendValidityDirection = determineSeonderyTrendValidityShift(candleData, prevCandles);
 
     if (!canExecuteTrade(tradeValidity, seonderyTrendValidityDirection, candleData)) {
         return false;
@@ -45,7 +45,7 @@ async function handleTrade({ candleData, prevCandles }) {
     let direction = tradeValidity.direction;
     let isFalseOrder = isTradeFalsifiable({ direction, candleData, prevCandles })
     if (isFalseOrder) {
-        sendFalseOrderAlert(direction , isFalseOrder);
+        sendFalseOrderAlert(direction, isFalseOrder);
         return false; // telegram.falseOrder is called within isFalsifiableTrade
     }
 
@@ -57,7 +57,7 @@ async function handleTrade({ candleData, prevCandles }) {
 }
 
 
-function sendFalseOrderAlert(direction , reason){
+function sendFalseOrderAlert(direction, reason) {
     telegram.falseOrder({
         direction,
         reason,
@@ -72,7 +72,7 @@ function checkTradeValidity(candleData) {
 
 function canExecuteTrade(tradeValidity, seonderyTrendValidityDirection, candleData) {
 
-    if(tradeValidity.direction == seonderyTrendValidityDirection ){
+    if (tradeValidity.direction == seonderyTrendValidityDirection) {
         return true;
     }
 
@@ -101,7 +101,7 @@ function constructTradePayload(direction, candleData, leverage) {
         direction,
         entryPrice: candleData[entryPriceKey],
         profitTakeZones: candleData[profitTakeKey],
-        candleId : candleData._id
+        candleId: candleData._id
     };
 }
 
@@ -193,7 +193,7 @@ async function handleTradeWithExistingTrade(
     prevCandles
 ) {
     // If needed then close the order
-    let closeResult = await handleCloseTrend(candleData , prevCandles, prevTrade);
+    let closeResult = await handleCloseTrend(candleData, prevCandles, prevTrade);
 
     if (!closeResult) {
         return false;
@@ -211,10 +211,10 @@ async function handleTradeWithExistingTrade(
  * This function will make dicition for closing order or not
  * @param {*} param0
  */
-async function handleCloseTrend(candleData,prevCandles , prevTrade) {
+async function handleCloseTrend(candleData, prevCandles, prevTrade) {
     try {
         // Check order close reason
-        let reason = handleTradeCloseResons(candleData, prevCandles , prevTrade);
+        let reason = handleTradeCloseResons(candleData, prevCandles, prevTrade);
         let profitMargin = calculateTwoRangePercentage(
             prevTrade.entryPrice,
             prevTrade.direction,
@@ -286,7 +286,7 @@ function sendOrderCloseAlertAlert(leverage, profitMargin, reason) {
  */
 function handleTradeCloseResons(candleData, prevCandles, prevTrade) {
     let prevTradeDirection = prevTrade.direction;
-    let reason = null;    
+    let reason = null;
     let hullLineDirection = determineHullLineDirection(candleData)
 
     if (prevTradeDirection !== hullLineDirection) {
@@ -303,14 +303,22 @@ function handleTradeCloseResons(candleData, prevCandles, prevTrade) {
  * @returns
  */
 function isValidTrade(candleData) {
-    let { strongBullish10 , strongBearish10 , hullLong10 , hullShort10 } = candleData.data
-    let direction = 
-    !!strongBullish10 && !!hullLong10 
-    ? "Long" 
-    : !!strongBearish10 && hullShort10
-    ? "Short" 
-    : null;
-    
+    let { strongBullish10, strongBearish10, hullLong10, hullShort10, signalLine10,
+        macdLine10 } = candleData.data
+
+    let macdDirection = macdLine10 > signalLine10 ? "Long" : macdLine10 <= signalLine10 ? "Short" : null
+
+    let strongDirection =
+        !!strongBullish10 && !!hullLong10
+            ? "Long"
+            : !!strongBearish10 && hullShort10
+                ? "Short"
+                : null;
+
+    let direction = macdDirection == strongDirection ? strongDirection : null
+
+
+
     let status = direction !== null;
     return {
         status,
@@ -324,7 +332,7 @@ function isValidTrade(candleData) {
  * @returns {Boolean | tradDocument}
  */
 async function fatchPreviousTrade(candleData) {
-    try{
+    try {
         let query = {
             name: SETTINGS.order.name,
             status: "running",
@@ -336,27 +344,27 @@ async function fatchPreviousTrade(candleData) {
         }
         return previousTrade;
 
-    }catch(err){
+    } catch (err) {
         console.warn(err)
     }
 }
 
 
-function determineHullLineDirection(candleData){
-    const {hullLong , hullShort} = candleData.data;
+function determineHullLineDirection(candleData) {
+    const { hullLong, hullShort } = candleData.data;
     let direction = !!hullLong ? "Long" : !!hullShort ? "Short" : null
     return direction
 }
 
 
-function determineSeonderyTrendValidityShift(candleData , prevCandles){
+function determineSeonderyTrendValidityShift(candleData, prevCandles) {
     // let seonderyTrendValidityDirection = determineTrendCatcherShift(candleData)
     // let AiChannelShift = determineAiChannelShift(candleData , prevCandles)
 
     let hullDirection = determineHullLineDirection(candleData)
 
-    
-    return hullDirection; 
+
+    return hullDirection;
     // return AiChannelShift;
 }
 

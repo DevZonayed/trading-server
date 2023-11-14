@@ -40,7 +40,7 @@ const DEFAULT_CANDLE_DATA_KEYS = [...REQUIRED_DATA_KEYS, "open", "close", "high"
 const LLB_CANDLE_DATA_KEYS = [...REQUIRED_DATA_KEYS, "strongBullish", "strongBearish", "consensus", "histogram", "signalLine", "macdLine", "signalLineCross", "upper", "lower", "hullLongShift", "hullShortShift", "hullLong", "hullShort"];
 
 
-const LLB10_CANDLE_DATA_KEYS = [...REQUIRED_DATA_KEYS, "hullLongShift10", "hullShortShift10", "hullLong10", "hullShort10", "strongBullish10", "strongBearish10", "long10", "short10"];
+const LLB10_CANDLE_DATA_KEYS = [...REQUIRED_DATA_KEYS, "hullLongShift10", "hullShortShift10", "hullLong10", "hullShort10", "strongBullish10", "strongBearish10", "long10", "short10" , "signalLine10" , "macdLine10"];
 
 const TYPES_FOR_FULL_CANDLE = ["default", "llb", "llb10"];
 
@@ -175,6 +175,8 @@ async function processLlb10Data(candleData, setData) {
       hullShort10,
       strongBullish10,
       strongBearish10,
+      signalLine10,
+      macdLine10
     } = candleData;
 
 
@@ -186,7 +188,9 @@ async function processLlb10Data(candleData, setData) {
       "data.strongBullish10": !!strongBullish10 ? strongBullish10 : null,
       "data.strongBearish10": !!strongBearish10 ? strongBearish10 : null,
       "data.long10": !!long10 ? long10 : null,
-      "data.short10": !!short10 ? short10 : null
+      "data.short10": !!short10 ? short10 : null,
+      "data.signalLine10": !!signalLine10 ? signalLine10 : null,
+      "data.macdLine10": !!macdLine10 ? macdLine10 : null,
     });
   } catch (err) {
     telegram.sendMessage("There is an error in laso10 data \n" + err)
