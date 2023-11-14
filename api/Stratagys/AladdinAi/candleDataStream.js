@@ -35,7 +35,7 @@ function isNewCandle(latestCandle, candleData) {
     if (!latestCandle[candleData.symbol]) {
       return true;
     }
-    return new Date(candleData.time) >= new Date(latestCandle[candleData.symbol]);
+    return new Date(candleData.time) > new Date(latestCandle[candleData.symbol]);
   }
   
   // Validates if the candleData meets the criteria for making a decision
