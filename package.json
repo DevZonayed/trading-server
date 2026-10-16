@@ -18,7 +18,7 @@
     "axios": "^1.2.3",
     "circular-json": "^0.5.9",
     "colors": "^1.4.0",
-    "compression": "^1.7.4",
+    "compression": "^1.8.2",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
